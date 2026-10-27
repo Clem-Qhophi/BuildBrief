@@ -1,0 +1,15 @@
+{
+  "name": "@buildbrief/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "bb": "dist/src/main.js"
+  },
+  "dependencies": {
+    "@buildbrief/domain": "0.1.0",
+    "@buildbrief/model-meta": "0.1.0",
+    "@buildbrief/repo": "0.1.0",
+    "@buildbrief/store": "0.1.0",
+    "@buildbrief/verifier": "0.1.0"
+  }
+}

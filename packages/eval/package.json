@@ -1,0 +1,23 @@
+{
+  "name": "@buildbrief/eval",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "bin": {
+    "bb-eval": "dist/src/run.js"
+  },
+  "dependencies": {
+    "@buildbrief/domain": "0.1.0",
+    "@buildbrief/model-meta": "0.1.0",
+    "@buildbrief/repo": "0.1.0",
+    "@buildbrief/store": "0.1.0",
+    "@buildbrief/verifier": "0.1.0"
+  }
+}

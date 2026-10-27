@@ -1,0 +1,16 @@
+# Files Build Brief never reads, transmits, or cites as evidence.
+.env
+.env.*
+*.pem
+*.key
+**/secrets/**
+node_modules/
+dist/
+.git/
+.buildbrief/
+*.png
+*.jpg
+*.mp4
+*.zip
+*.exe
+*.dll

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "references": [
+    { "path": "packages/domain" },
+    { "path": "packages/store" },
+    { "path": "packages/repo" },
+    { "path": "packages/model-meta" },
+    { "path": "packages/verifier" },
+    { "path": "packages/cli" },
+    { "path": "packages/eval" }
+  ],
+  "include": []
+}
