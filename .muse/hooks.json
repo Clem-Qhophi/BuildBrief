@@ -1,0 +1,16 @@
+{
+  "_comment": "UNVERIFIED TEMPLATE - see packages/muse/HANDLERS.md. The inner schema of this file is not published on dev.meta.ai/docs/muse-code/extending and no candidate shape has been observed to fire under 'muse exec'. Do not present this file as a working integration. Candidate shape kept for the interactive-session test.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node packages/muse/handlers/capture.js"
+          }
+        ]
+      }
+    ]
+  }
+}

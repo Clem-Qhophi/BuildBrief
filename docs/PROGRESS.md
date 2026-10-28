@@ -20,6 +20,36 @@
 ### Next
 Scaffold workspaces + EPIC 01/02 (domain, store, CLI capture/approve) with `node:test` suites.
 
+## 2026-10-28 (Wed) — Day 2 (M2)
+
+### Done
+- Baseline re-verified: commit `67956fe` intact, 32/32 unit + 12/12 eval green before changes.
+  Default sandbox used throughout (no escalation, no bypass).
+- Engine stress: 6 new dev cases (cross-file evidence/contradiction, `.env` orphan,
+  multi-file verdicts, second-revision staleness, vacuous criteria) + 4 CLI capture
+  tests (ambiguity/conflict preserved, never auto-approved) + 2 known-gap probes
+  (comment-mirage FP, vocabulary-miss FN — documented, gated out of metrics).
+- Meta docs re-validated live (endpoint, Bearer `LLM_`, `muse-spark-1.3` Standard,
+  `response_format:json_schema`); no key in env so no live call (see `docs/META_SETUP.md`).
+- Native integration: stdio MCP server (7 tools, JSON-RPC harness green), project
+  skill (`muse skills validate`: valid), hook handlers (capture/guard, 4/4 green).
+  `.muse/hooks.json` ships as an UNVERIFIED template (ADR-009, empirical log kept).
+- Integrated referral demo via MCP (`samples/referral-demo/mcp-loop.mjs`): capture,
+  approve, verify, fix through the server; patch + CLI recheck flips expiry to
+  supported with old findings invalidated. Provenance labels added to DEMO.md.
+- Web/Understanding Studio scoped as plan-only (`docs/WEB_PLAN.md`); no mock UI built.
+
+### Tests run
+- `npm test`: 42/42 (32 dist suites + 4 CLI + 2 MCP + 4 handlers).
+- `npm run test:eval`: dev 16/16, holdout 4/4; verdicts P/R 1.00 (21/0/0);
+  orphans P/R 1.00 (5/0/0, 2 informative-low); gaps documented 2.
+- `muse skills validate .agents/skills/build-brief`: valid.
+- Scope reminder: controlled seeded benchmark only, not real-world accuracy.
+
+### Next
+M3: Meta live smoke (needs key) → `--provider meta` on one eval case → quiz +
+role tour (WEB_PLAN phase 2 slice) → interactive-session hook firing test.
+
 ## Milestone log (append-only)
 
 - M0 2026-10-27: audit + docs + plan complete; coding not started.
@@ -30,3 +60,7 @@ Scaffold workspaces + EPIC 01/02 (domain, store, CLI capture/approve) with `node
   `samples/referral-demo/DEMO.md` for the replay script.
   Unit: 32/32 pass. Eval: 10/10 dev + 2/2 holdout, orphan precision/recall 1.00,
   0 fake citations, $0 model cost (rules-v1). Results in `eval-results/` (git-ignored).
+  Commit: `67956fe` (new commit only; nothing pushed, history untouched).
+- M2 2026-10-28: real integration + independent verification. MCP server, skill,
+  handlers tested; eval 16 dev + 4 holdout + 2 documented gaps; Meta re-validated
+  (no live call — no key); hooks template UNVERIFIED; web/Studio plan-only.

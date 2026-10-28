@@ -19,6 +19,10 @@ Internal freeze: **Nov 4, 18:00 Ghana time**. Dates subject to organizer change.
 - [x] E2 (Oct 27, early): Capture → approve → evidence lookup works from CLI.
 - [x] E3 (Oct 27, early): Structured verifier + adjudicator; unknowns honest; 10 dev eval cases green.
 - [x] E4 (Oct 27, early): Correction pack → real patch → recheck demonstrated live; benchmark running (10 dev + 2 holdout green).
+- [x] M2-E5: Eval expanded (16 dev + 4 holdout + 2 documented gaps); verdict precision/recall reported.
+- [x] M2-E6: MCP server + project skill + hook handlers tested; hooks.json template honestly UNVERIFIED; Meta docs re-validated, no key in env (see `docs/META_SETUP.md`).
+- [ ] E5 (Oct 31): Report export + sample fixture reproducible (web deferred to `docs/WEB_PLAN.md`).
+- [ ] E7 (Nov 2): One quiz + one role tour on same-revision evidence (planned, not built).
 - [ ] E5 (Oct 31): Report export (JSON/MD/HTML) + sample fixture reproducible.
       Cut rule: no end-to-end → freeze surfaces, fix evidence engine.
 - [ ] E6 (Nov 1): Muse hook/MCP capture or documented fallback; one orphan-change demo.

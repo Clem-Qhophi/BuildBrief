@@ -39,3 +39,21 @@ node $BB recheck --project demo --intent <ID> --repo $demo --base $base --format
 
 Verified 2026-10-27: expiry `not_established` -> `supported` across revisions;
 2 old findings invalidated; auth orphan persists for human disposition.
+
+## MCP-driven variant (M2, verified 2026-10-28)
+
+`mcp-loop.mjs` drives the real stdio MCP server through the same loop
+(capture -> list -> approve -> verify -> fix); finish with `bb recheck`:
+
+```powershell
+node samples/referral-demo/mcp-loop.mjs <ledger-dir> <repo-dir> <base-sha>
+# apply v3, commit, then the printed `bb recheck ...` command
+```
+
+## Provenance labels (read the demo honestly)
+
+- Findings marked `[rules/rules-v1]` are DETERMINISTIC (lexical assessor +
+  mechanical adjudicator, $0). Findings marked `[meta/muse-spark-1.3]` would be
+  LIVE AI findings (model proposes, adjudicator still gates every citation).
+- v1/v2/v3 file sets are SEEDED test conditions, not organic agent output.
+- The auth bypass edit is a SEEDED fault standing in for unrequested drift.

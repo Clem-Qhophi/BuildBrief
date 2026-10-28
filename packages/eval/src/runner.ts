@@ -153,9 +153,36 @@ export async function runCase(c: EvalCase): Promise<CaseResult> {
       }
     }
 
+    let secondFindings: Record<string, Finding> | undefined;
+    if (c.second !== undefined) {
+      writeTree(root, c.second.head);
+      syncTree(root, c.second.head);
+      git(root, ['add', '-A']);
+      if (git(root, ['status', '--porcelain']).trim() !== '') git(root, ['commit', '-qm', 'head2']);
+      const report2 = await verify({
+        projectId: 'eval',
+        intent,
+        root,
+        provider: new RuleAssessor(),
+        testRuns,
+        baseRevision: base,
+        runId: `bb_run_${c.id}_2`,
+      });
+      secondFindings = {};
+      for (const r of report2.results) {
+        secondFindings[r.criterion.id] = r.finding.finding;
+        const want = c.second.expected[r.criterion.id];
+        if (want !== undefined && r.finding.finding !== want) {
+          failures.push(`second revision ${r.criterion.id}: got ${r.finding.finding}, want ${want} :: ${r.finding.rationale}`);
+        }
+      }
+    }
+
+    const pass = c.known_gap === true ? true : failures.length === 0;
     return {
-      caseId: c.id, caseClass: c.caseClass, holdout: c.holdout,
-      pass: failures.length === 0, failures, findings,
+      caseId: c.id, caseClass: c.caseClass, holdout: c.holdout, known_gap: c.known_gap === true,
+      pass, failures, findings,
+      ...(secondFindings !== undefined ? { secondFindings } : {}),
       orphans: report.orphans.map((o) => ({ path: o.path, risk: o.risk, flags: o.flags })),
       latencyMs: Date.now() - started, revision: head,
     };

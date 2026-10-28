@@ -13,3 +13,7 @@
 | 2026-10-27 | `MetaApiProvider` implemented + unit-tested but never called live (no key) | Medium — `--provider meta` fails loudly without key, by design | Human action: H4, then one Standard `muse-spark-1.3` smoke call |
 | 2026-10-27 | RuleAssessor is lexical (keyword/forbidden overlap), not semantic | Medium — honest within benchmark; real-model adjudication is the P1 upgrade | Tracked: eval labels pin current behavior; Meta provider path exists |
 | 2026-10-27 | Eval is single-language (JS/TS-shaped fixtures), one repo shape per case | Low for hackathon | P1: second language + multi-file feature areas |
+| 2026-10-28 | `.muse/hooks.json` inner schema unpublished; no candidate fired under `muse exec` | Medium — native capture unproven; MCP+skill carry integration | Interactive-session test pending; template marked UNVERIFIED (ADR-009) |
+| 2026-10-28 | No `BB_META_API_KEY`/`MODEL_API_KEY` in environment; no live Meta call made | Medium — rules provider is the only measured path | Human action: `docs/META_SETUP.md` (claim credit, set key, run `--provider meta`) |
+| 2026-10-28 | Lexical engine trusts comments (gap-comment-mirage FP) and misses paraphrased behavior (gap-vocabulary-miss FN) | Medium — documented, gated out of release metrics | Real-model adjudication (P1) is the intended fix; gaps recorded in eval output |
+| 2026-10-28 | PowerShell `Set-Content -Encoding utf8` writes BOM (broke first hooks.json) | Low — lesson recorded | Write JSON configs via `[IO.File]::WriteAllText` or `ConvertTo-Json` |

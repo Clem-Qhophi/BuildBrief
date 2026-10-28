@@ -34,6 +34,10 @@ P2 items are preserved in `docs/roadmap.md` and are **not** built for the submis
 - EPIC 07 — `packages/eval` + `samples/referral-demo` + labels
 - EPIC 08 — report export (CLI surface; web deferred per ADR-006)
 - EPIC 09–12 — P1s, in priority order, only when P0 rechecks green twice
+- M2 status (2026-10-28): EPIC 09 partial — MCP server + skill + handlers DONE and
+  tested; `.muse/hooks.json` firing UNVERIFIED (template only, ADR-009). EPIC 10
+  (reverse check) DONE in P0 and extended with `.env`/deleted-test cases. EPIC 11–12
+  (quiz/tour/autopsy) planned in `docs/WEB_PLAN.md`, not built.
 
 ## Hard cuts (from blueprint §17)
 

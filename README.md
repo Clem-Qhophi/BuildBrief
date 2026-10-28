@@ -15,8 +15,8 @@ evidence-backed fix briefs, and reverify after the patch. Full vision and author
 ```sh
 npm install
 npm run build
-npm test            # 32 unit tests
-npm run test:eval   # 12 seeded benchmark cases (10 dev + 2 holdout)
+npm test            # 42 unit tests (incl. MCP protocol + hook handlers)
+npm run test:eval   # 22 seeded cases: 16 dev + 4 holdout + 2 documented gaps
 ```
 
 ## The loop (5 minutes)
@@ -41,6 +41,8 @@ Scripted demo with seeded faults: [`samples/referral-demo/DEMO.md`](samples/refe
 - `packages/model-meta` — typed provider; `MetaApiProvider` (Standard, structured JSON) + `MockProvider` + `RuleAssessor` fallback
 - `packages/verifier` — retrieval, assessment, reverse-check, correction packs, reports
 - `packages/cli` — `bb` command surface
+- `packages/mcp` — stdio MCP server (`bb_*` tools delegate to the tested CLI)
+- `packages/muse` — hook handlers, skill source, hooks research notes
 - `packages/eval` — seeded fixtures, labels, runner, metrics (no hand-edited scores)
 - `samples/referral-demo` — faulty demo app (v1 base, v2 fault, v3 fix)
 - `docs/` — plan, architecture, decisions, progress, risks, hackathon checklist, roadmap

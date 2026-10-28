@@ -41,15 +41,27 @@ export interface EvalCase {
   testRuns?: { command: string[]; covers: string[]; exitCode: number }[];
   /** Forbidden strings that must appear NOWHERE in findings/packs (injection probe). */
   forbiddenInOutput?: string[];
+  /**
+   * Known-gap probe: documents a suspected engine weakness (false confidence or
+   * miss). Runs and reports, but never fails the gate — the gap is the finding.
+   */
+  known_gap?: boolean;
+  /** Optional second revision: re-verify after these files replace head. */
+  second?: {
+    head: Record<string, string>;
+    expected: Record<string, Finding>;
+  };
 }
 
 export interface CaseResult {
   caseId: string;
   caseClass: CaseClass;
   holdout: boolean;
+  known_gap: boolean;
   pass: boolean;
   failures: string[];
   findings: Record<string, Finding>;
+  secondFindings?: Record<string, Finding>;
   orphans: { path: string; risk: string; flags: string[] }[];
   latencyMs: number;
   revision: string;

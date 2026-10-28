@@ -1,0 +1,7 @@
+{
+  "name": "@buildbrief/muse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Native Muse Code integration: hooks, MCP server, skill (see README)"
+}

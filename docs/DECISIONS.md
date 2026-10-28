@@ -43,6 +43,25 @@ Living log. Newest first. Status: proposed | accepted | superseded.
 - P0 demo surface = `bb` CLI + JSON/Markdown/HTML report export. Web workbench (Next.js) starts
   only after the slice rechecks green twice (blueprint hard-cut rule, §17).
 
+## ADR-009 (accepted 2026-10-28): Native integration via MCP + skill first, hooks template unverified
+
+- Empirically (Muse 1.4.14): only the MCP server (JSON-RPC harness), the project
+  skill (`muse skills validate`: valid), and the handlers (unit-tested,
+  payload-defensive) count as functioning integration. The `.muse/hooks.json`
+  inner schema is unpublished; two candidate shapes failed to fire under
+  `muse exec` (details: `packages/muse/HANDLERS.md`). The template ships marked
+  UNVERIFIED; live firing needs one interactive session. PreToolUse guard is
+  advisory (exit 0 + warn) until block semantics are confirmed on the installed
+  build — inventing an exit-code protocol would be fabrication.
+
+## ADR-008 (accepted 2026-10-28): False-accusation metric counts medium+ only
+
+- An unexpected orphan flag at low risk is informative-by-design (never silent about
+  unmapped changes), not a false accusation. The eval's orphan precision counts only
+  unexpected flags at medium risk or higher as FP; low-risk unexpected flags are
+  reported as `informativeLow`. Rationale: punishing low-risk transparency would
+  incentivize silence, which the product forbids.
+
 ## ADR-007 (accepted 2026-10-27): Deleted tests are always review items
 
 - A deleted test file is flagged (`deleted_test_or_suite`, risk ≥ high) even when its content
