@@ -21,17 +21,18 @@ Internal freeze: **Nov 4, 18:00 Ghana time**. Dates subject to organizer change.
 - [x] E4 (Oct 27, early): Correction pack → real patch → recheck demonstrated live; benchmark running (10 dev + 2 holdout green).
 - [x] M2-E5: Eval expanded (16 dev + 4 holdout + 2 documented gaps); verdict precision/recall reported.
 - [x] M2-E6: MCP server + project skill + hook handlers tested; hooks.json template honestly UNVERIFIED; Meta docs re-validated, no key in env (see `docs/META_SETUP.md`).
-- [ ] E5 (Oct 31): Report export + sample fixture reproducible (web deferred to `docs/WEB_PLAN.md`).
-- [ ] E7 (Nov 2): One quiz + one role tour on same-revision evidence (planned, not built).
-- [ ] E5 (Oct 31): Report export (JSON/MD/HTML) + sample fixture reproducible.
-      Cut rule: no end-to-end → freeze surfaces, fix evidence engine.
-- [ ] E6 (Nov 1): Muse hook/MCP capture or documented fallback; one orphan-change demo.
-- [ ] E7 (Nov 2): One quiz + one role tour on same-revision evidence.
-- [ ] E8 (Nov 3): Benchmark freeze, security pass, README, full demo rehearsed twice from reset.
+- [x] E5: Report export (JSON/MD/HTML) + sample fixture reproducible (M1–M2).
+- [x] E6: MCP capture + hook handlers tested, hooks.json honestly UNVERIFIED; orphan demo live (M2).
+- [x] E7: Quiz + role tour + comprehension map + autopsy on same-revision evidence (M3a/M3d/M3g).
+- [x] E8: Benchmark at 30 cases (22 dev + 6 holdout, JS/TS + Python) green + stable; README current; demo rehearsed from reset twice (M3f/M3h) + owner eyeball of workbench.
 - [ ] E9 (Nov 4 ≤18:00 Ghana): Private-window link check, submit, save receipt.
 
-## Submission kit (assembled Nov 3)
+## Submission kit (docs assembled Oct 28 — M3c; recording + submit remain)
 
-Runnable demo or replay-labeled recording · source repo · README (<5 min setup) · sample project ·
-model/tool disclosure · eval commands + honest results · privacy statement · architecture note ·
-failure cases · competition checklist · no credentials anywhere.
+- [x] Source repo (pending owner commit), README (<5 min setup, claims verified)
+- [x] Runnable demo + timed script (`docs/DEMO_SCRIPT.md`) + sample project
+- [x] Model/tool disclosure, eval commands + honest results, privacy statement
+- [x] Architecture note, failure cases, competition checklist
+- [x] No credentials anywhere (verified: keys env-only, ledger/logs clean)
+- [ ] Recording (owner action, see `docs/VIDEO_OUTLINE.md`)
+- [ ] Portal submit + receipt (Nov 4, owner action)

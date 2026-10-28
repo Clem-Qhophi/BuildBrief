@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@buildbrief/domain": "0.1.0",
+    "@buildbrief/learning": "0.1.0",
     "@buildbrief/model-meta": "0.1.0",
     "@buildbrief/repo": "0.1.0",
     "@buildbrief/store": "0.1.0",

@@ -59,6 +59,7 @@ describe('mcp stdio server', () => {
       assert.deepEqual(toolNames(), [
         'bb_capture', 'bb_list_intents', 'bb_approve_intent', 'bb_get_context',
         'bb_verify', 'bb_report', 'bb_make_fix_brief',
+        'bb_explain', 'bb_quiz', 'bb_tour', 'bb_map', 'bb_autopsy',
       ]);
       s.send({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 't', version: '0' } } });
       const hello = await s.next();

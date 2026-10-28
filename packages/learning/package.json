@@ -1,0 +1,17 @@
+{
+  "name": "@buildbrief/learning",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "dependencies": {
+    "@buildbrief/domain": "0.1.0",
+    "@buildbrief/verifier": "0.1.0"
+  }
+}

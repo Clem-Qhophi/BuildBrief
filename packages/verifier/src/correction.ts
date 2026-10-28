@@ -36,7 +36,9 @@ export function packsForFailures(req: PackRequest): CorrectionPack[] {
       'Do NOT touch anything under do_not_touch without explicit owner approval.',
     ].join('\n');
     const built = buildCorrectionPack({
-      id: req.id,
+      // One pack per failing finding: the id must be unique per finding or the
+      // ledger view (keyed by id) silently keeps only the last pack of a run.
+      id: `${req.id}-${f.id}`,
       project_id: req.projectId,
       finding_ids: [f.id],
       target_revision: f.checked_revision,

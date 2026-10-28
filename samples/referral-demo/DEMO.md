@@ -4,7 +4,7 @@ Seeded faults: v2 implements generation + 20% credit but **no 30-day expiry**, a
 touches `src/auth.js` without authorization. v3 adds the expiry (the "agent patch").
 Expiry flips `not_established` to `supported`; the auth orphan stays for human disposition.
 
-Run from the repo root (`BB` = `node packages/cli/dist/src/main.js`). Use any
+Run from the repo root (`$BB` = `packages/cli/dist/src/main.js`). Use any
 empty ledger directory so the demo never pollutes this repo.
 
 ```powershell
@@ -47,8 +47,25 @@ Verified 2026-10-27: expiry `not_established` -> `supported` across revisions;
 
 ```powershell
 node samples/referral-demo/mcp-loop.mjs <ledger-dir> <repo-dir> <base-sha>
-# apply v3, commit, then the printed `bb recheck ...` command
+# apply v3, commit, then the printed `node packages/cli/... recheck ...` command
 ```
+
+## Understanding Studio slice (verified 2026-10-28)
+
+On the v2 (faulty) revision, after verify:
+
+```powershell
+$BB = 'packages/cli/dist/src/main.js'   # repo root; run from the repo root
+node $BB explain --project demo --intent <ID> --run <RUN>
+node $BB quiz --project demo --intent <ID> --run <RUN> [--repo <dir>]
+node $BB answer --project demo --quiz <QID> --actor learner1 --text "src/referral.js lines 1 to 3"
+node $BB grade --project demo --response <RID> --grade pass --by owner1   # predict/explain only
+node $BB tour --project demo --intent <ID> --run <RUN> --role marketing
+```
+
+Locate answers grade mechanically; open answers stay pending for a human.
+`quiz --repo` retires stored questions whose evidence moved (shown live:
+2 retired after the v3 patch).
 
 ## Provenance labels (read the demo honestly)
 

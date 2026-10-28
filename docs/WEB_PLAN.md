@@ -5,7 +5,7 @@ Constraint: no mock interfaces. Every pixel reads the real ledger
 (`.buildbrief/reports/*.json`). If the backend cannot answer, the UI shows
 the gap — never a fabricated value.
 
-## Phase 1: workbench (read-only over M2 outputs)
+## Phase 1: workbench (read-only over M2 outputs) — BUILT 2026-10-28 (M3b)
 
 - `apps/web` (Next.js, local-first): routes `/projects`, `/intent/:id`,
   `/verify/:run`, `/changes`, `/fix/:pack`. Data via API routes that shell out

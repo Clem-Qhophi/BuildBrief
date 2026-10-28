@@ -1,12 +1,10 @@
+import { contentHash, newId, nowIso } from './ids.js';
 import {
-  contentHash,
-  newId,
-  nowIso,
   type AtomicCriterion,
-  type CaptureCompleteness,
   type IntentConstraint,
   type IntentVersion,
-} from '@buildbrief/domain';
+} from './intent.js';
+import { type CaptureCompleteness } from './vocab.js';
 
 const STOPWORDS = new Set([
   'the', 'a', 'an', 'and', 'or', 'to', 'of', 'in', 'on', 'for', 'with', 'must', 'should',

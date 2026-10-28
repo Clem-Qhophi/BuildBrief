@@ -64,6 +64,12 @@ export interface VerificationReport {
   results: CriterionResult[];
   orphans: CandidateUnrequestedChange[];
   summary: Record<string, number>;
+  /**
+   * Test runs attached to this verification (command, exit, counts, covers).
+   * Empty when no tests were executed: grades then rest on source evidence
+   * alone, and the renderers say so. Logs are content-addressed by hash only.
+   */
+  test_runs: CoveringTestRun[];
 }
 
 const MAX_EVIDENCE_PER_CRITERION = 4;
@@ -261,6 +267,7 @@ export async function verify(opts: VerifyOptions): Promise<VerificationReport> {
     results,
     orphans,
     summary,
+    test_runs: runs,
   };
 }
 

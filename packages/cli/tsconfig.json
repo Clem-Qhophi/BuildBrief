@@ -11,6 +11,7 @@
     { "path": "../model-meta" },
     { "path": "../repo" },
     { "path": "../store" },
-    { "path": "../verifier" }
+    { "path": "../verifier" },
+    { "path": "../learning" }
   ]
 }

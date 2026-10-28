@@ -3,4 +3,5 @@ export * from './assess.js';
 export * from './reverse.js';
 export * from './verify.js';
 export * from './correction.js';
+export * from './autopsy.js';
 export * from './report.js';

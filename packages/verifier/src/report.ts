@@ -37,6 +37,15 @@ export function renderMarkdown(report: VerificationReport): string {
     }
   }
   lines.push('');
+  lines.push('## Test runs');
+  if (report.test_runs.length === 0) {
+    lines.push('No test runs recorded — grades rest on source evidence alone (E1 at best).');
+  } else {
+    for (const t of report.test_runs) {
+      lines.push(`- \`${t.run.id}\` ${t.run.command.join(' ')} — exit ${t.run.exit_code}, passed ${t.run.passed}, failed ${t.run.failed}, covers: ${t.covers.join(', ') || 'nothing (no grade effect)'}`);
+    }
+  }
+  lines.push('');
   lines.push(`Summary: ${Object.entries(report.summary).map(([k, v]) => `${k}=${v}`).join(', ') || 'no criteria'}`);
   lines.push('');
   return lines.join('\n');
@@ -51,7 +60,10 @@ export function renderHtml(report: VerificationReport): string {
   const orphans = report.orphans.length === 0
     ? '<p>None flagged.</p>'
     : `<ul>${report.orphans.map((o) => `<li>[${o.risk}] ${esc(o.path)} — ${esc(o.why_flagged)}</li>`).join('')}</ul>`;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Build Brief report ${esc(report.run_id)}</title></head><body><h1>Build Brief verification report</h1><p>run ${esc(report.run_id)} - revision ${esc(report.checked_revision)} - ${esc(report.provider)}/${esc(report.model)}</p>${rows}<h2>Possibly unrequested changes</h2>${orphans}</body></html>`;
+  const tests = report.test_runs.length === 0
+    ? '<p>No test runs recorded — grades rest on source evidence alone (E1 at best).</p>'
+    : `<ul>${report.test_runs.map((t) => `<li><code>${esc(t.run.id)}</code> ${esc(t.run.command.join(' '))} — exit ${t.run.exit_code}, passed ${t.run.passed}, failed ${t.run.failed}</li>`).join('')}</ul>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Build Brief report ${esc(report.run_id)}</title></head><body><h1>Build Brief verification report</h1><p>run ${esc(report.run_id)} - revision ${esc(report.checked_revision)} - ${esc(report.provider)}/${esc(report.model)}</p>${rows}<h2>Possibly unrequested changes</h2>${orphans}<h2>Test runs</h2>${tests}</body></html>`;
 }
 
 export function renderJson(report: VerificationReport): string {

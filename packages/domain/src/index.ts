@@ -6,3 +6,5 @@ export * from './findings.js';
 export * from './events.js';
 export * from './changes.js';
 export * from './correction.js';
+export * from './extract.js';
+export * from './learning.js';

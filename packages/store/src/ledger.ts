@@ -1,5 +1,5 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import {
   contentHash,
   type EventType,
@@ -25,9 +25,10 @@ export interface ProjectStore {
 }
 
 export function openProjectStore(workspaceRoot: string, projectId: string): ProjectStore {
-  const root = join(workspaceRoot, '.buildbrief');
-  mkdirSync(join(root, 'state'), { recursive: true });
-  return { root, projectId };
+  // Pure handle: never touches the filesystem. Reads tolerate missing files;
+  // writes create their directories. A read-only command must not leave a
+  // `.buildbrief/` behind in whatever directory it ran from.
+  return { root: join(workspaceRoot, '.buildbrief'), projectId };
 }
 
 function eventsPath(s: ProjectStore): string {
@@ -65,6 +66,7 @@ export function appendEvent(
   const at = opts.at ?? nowIso();
   const hash = contentHash(`${prev}|${type}|${projectId}|${at}|${canonicalJson(payload)}`);
   const event: LedgerEvent = { id, type, project_id: projectId, at, prev, hash, payload };
+  mkdirSync(s.root, { recursive: true });
   appendFileSync(eventsPath(s), `${JSON.stringify(event)}\n`, 'utf8');
   return event;
 }
@@ -95,5 +97,6 @@ export function readView<T>(s: ProjectStore, name: string, fallback: T): T {
 }
 
 export function writeView(s: ProjectStore, name: string, value: unknown): void {
+  mkdirSync(dirname(viewPath(s, name)), { recursive: true });
   writeFileSync(viewPath(s, name), `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }

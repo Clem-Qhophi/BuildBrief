@@ -35,6 +35,8 @@ export interface EvalCase {
   expectedGrades?: Record<string, 'E0_claim' | 'E1_source' | 'E2_test' | 'E3_runtime' | 'E4_production'>;
   /** Orphan paths that MUST be flagged (empty = none expected). */
   expectedOrphans: string[];
+  /** Exact risk asserted per flagged orphan path (subset is fine). */
+  expectedRisk?: Record<string, 'low' | 'medium' | 'high' | 'critical'>;
   /** Max allowed risk among flagged orphans NOT in expectedOrphans (false-alarm guard). */
   maxUnexpectedRisk?: 'low' | 'medium' | 'high' | 'critical';
   /** Covering test runs attached at head revision (ids assigned by runner). */

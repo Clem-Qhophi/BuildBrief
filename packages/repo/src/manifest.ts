@@ -51,9 +51,10 @@ function escapeRx(s: string): string {
 
 /** Resolves `target` against root; throws when it escapes the root (traversal defense). */
 export function safeJoin(root: string, target: string): string {
-  const abs = resolve(root, target);
-  const rel = relative(root, abs);
-  if (rel === '' || rel.startsWith('..') || abs !== join(root, rel)) {
+  const base = resolve(root);
+  const abs = resolve(base, target);
+  const rel = relative(base, abs);
+  if (rel === '' || rel === '..' || rel.startsWith(`..${sep}`)) {
     throw new Error(`path escapes repository root: ${target}`);
   }
   return abs;

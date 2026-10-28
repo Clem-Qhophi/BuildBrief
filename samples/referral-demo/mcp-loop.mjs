@@ -72,5 +72,5 @@ const fix = await call('bb_make_fix_brief', { project: 'demo', run: runId });
 console.log('FIX (first 800 chars):\n' + fix.content[0].text.slice(0, 800));
 
 console.log(`\nNEXT: apply v3 patch in ${repoDir}, commit, then:`);
-console.log(`  bb recheck --project demo --intent ${intentId} --repo ${repoDir} --base ${baseSha}`);
+console.log(`  node packages/cli/dist/src/main.js recheck --project demo --intent ${intentId} --repo ${repoDir} --base ${baseSha}`);
 server.kill();

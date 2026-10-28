@@ -6,5 +6,12 @@ dist/
 .env.local
 coverage/
 eval-results/
+.test-tmp/
+.demo-tmp/
+.npm-cache/
+.npm-run-tmp/
+.next/
+test-results/
+playwright-report/
 .DS_Store
 Thumbs.db

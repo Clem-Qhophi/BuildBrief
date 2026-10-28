@@ -24,7 +24,7 @@ export function validateDisposition(v: unknown): v is Disposition {
 export const SENSITIVE_PATH_RULES: { pattern: RegExp; flag: string; risk: OrphanRisk }[] = [
   { pattern: /(^|\/)auth(\/|[^/]*\.(ts|js|py|go|java)$)/i, flag: 'auth_file_touched', risk: 'critical' },
   { pattern: /(^|\/)(login|session|password|token|oauth)(\/|[^/]*\.(ts|js|py|go|java)$)/i, flag: 'identity_file_touched', risk: 'critical' },
-  { pattern: /\.test\.(ts|js|tsx|jsx)$|\.spec\.(ts|js)$|__tests__\//i, flag: 'test_file_touched', risk: 'high' },
+  { pattern: /\.test\.(ts|js|tsx|jsx)$|\.spec\.(ts|js)$|__tests__\/|(^|\/)tests?\/|(^|\/)test_[^/]*\.py$|[^/]*_test\.py$|(^|\/)conftest\.py$/i, flag: 'test_file_touched', risk: 'high' },
   { pattern: /migrations?\//i, flag: 'migration_touched', risk: 'high' },
   { pattern: /(^|\/)schema\.(sql|prisma|ts)$/i, flag: 'schema_touched', risk: 'high' },
   { pattern: /package-lock\.json|pnpm-lock\.yaml|yarn\.lock|requirements.*\.txt|pyproject\.toml|go\.mod/i, flag: 'dependency_manifest_touched', risk: 'medium' },

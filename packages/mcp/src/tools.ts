@@ -116,6 +116,78 @@ export const TOOLS: ToolDef[] = [
     },
     args: ['fix'],
   },
+  {
+    name: 'bb_explain',
+    description: 'Explain a verified feature from its approved intent and verification report. Grounded in evidence; unknowns explicit.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string' },
+        intent: { type: 'string' },
+        run: { type: 'string' },
+      },
+      required: ['project', 'intent', 'run'],
+    },
+    args: ['explain'],
+  },
+  {
+    name: 'bb_quiz',
+    description: 'Generate locate/predict quiz questions from verified findings. Locate answers are graded mechanically; open answers await human grading.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string' },
+        intent: { type: 'string' },
+        run: { type: 'string' },
+        types: { type: 'string' },
+      },
+      required: ['project', 'intent', 'run'],
+    },
+    args: ['quiz'],
+  },
+  {
+    name: 'bb_tour',
+    description: 'Role-targeted brief (founder, engineer, marketing, ...) from intent plus findings. Business policy is never invented.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string' },
+        intent: { type: 'string' },
+        run: { type: 'string' },
+        role: { type: 'string' },
+      },
+      required: ['project', 'intent', 'run'],
+    },
+    args: ['tour'],
+  },
+  {
+    name: 'bb_map',
+    description: 'Comprehension map: per-criterion status from recorded quiz activity. Only current-revision, non-retired answers count; gaps show as untested, stale, or unmeasured.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string' },
+        intent: { type: 'string' },
+        repo: { type: 'string' },
+      },
+      required: ['project', 'intent'],
+    },
+    args: ['map'],
+  },
+  {
+    name: 'bb_autopsy',
+    description: 'Prompt autopsy: groups 2+ failed attempts per criterion into Observed facts / Plausible causes / Unknowns plus one scoped next prompt. Single failures are referred to bb_make_fix_brief.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string' },
+        intent: { type: 'string' },
+        criterion: { type: 'string' },
+      },
+      required: ['project', 'intent'],
+    },
+    args: ['autopsy'],
+  },
 ];
 
 const FLAG_FOR: Record<string, string> = {
@@ -131,6 +203,9 @@ const FLAG_FOR: Record<string, string> = {
   provider: 'provider',
   run: 'run',
   format: 'format',
+  types: 'types',
+  role: 'role',
+  criterion: 'criterion',
 };
 
 export interface ToolResult {

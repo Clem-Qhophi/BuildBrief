@@ -6,14 +6,17 @@ import {
   approveIntent,
   buildCorrectionPack,
   contentHash,
+  gradeLocate,
   resolveCitation,
   riskForPath,
   stableId,
   validateIntentVersion,
+  validateQuizItem,
   type AtomicCriterion,
   type EvidencePointer,
   type IntentVersion,
   type ProposedVerdict,
+  type QuizItem,
 } from '../src/index.js';
 
 function draftIntent(overrides: Partial<IntentVersion> = {}): IntentVersion {
@@ -229,5 +232,47 @@ describe('correction packs and change risk', () => {
     assert.equal(riskForPath('src/auth/middleware.ts').risk, 'critical');
     assert.equal(riskForPath('src/x.test.ts').risk, 'high');
     assert.deepEqual(riskForPath('src/referral.ts'), { risk: 'low', flags: [] });
+  });
+
+  it('flags Python test conventions as test files (parity with JS)', () => {
+    for (const p of ['tests/test_referral.py', 'src/test_auth.py', 'src/referral_test.py', 'tests/conftest.py']) {
+      const r = riskForPath(p);
+      assert.equal(r.risk, 'high', p);
+      assert.ok(r.flags.includes('test_file_touched'), p);
+    }
+    // Near-misses must NOT match: contest.py, latest.py, protested.js.
+    for (const p of ['src/contest.py', 'src/latest.py', 'src/protested.js']) {
+      assert.equal(riskForPath(p).risk, 'low', p);
+    }
+  });
+});
+
+describe('learning types', () => {
+  const quiz: QuizItem = {
+    id: 'q1',
+    project_id: 'p',
+    revision: 'abc',
+    criterion_ids: ['c1'],
+    type: 'locate',
+    prompt: 'Where is expiry implemented?',
+    rubric: ['src/referral.js#L1-L5'],
+    evidence_ids: ['e1'],
+    difficulty: 1,
+    status: 'draft',
+  };
+  const evidence = [{ id: 'e1', path: 'src/referral.js', line_start: 1, line_end: 5 }];
+
+  it('validates quiz payloads at trust boundaries', () => {
+    assert.equal(validateQuizItem(quiz).ok, true);
+    assert.equal(validateQuizItem({ ...quiz, rubric: [] }).ok, false);
+    assert.equal(validateQuizItem({ ...quiz, type: 'guess' }).ok, false);
+  });
+
+  it('grades locate answers on file plus overlapping range', () => {
+    assert.equal(gradeLocate(quiz, 'src/referral.js lines 2-4', evidence), 'pass');
+    assert.equal(gradeLocate(quiz, 'referral.js', evidence), 'pass');
+    assert.equal(gradeLocate(quiz, 'src/auth.js lines 1-2', evidence), 'fail');
+    assert.equal(gradeLocate(quiz, 'src/referral.js lines 40-50', evidence), 'fail');
+    assert.equal(gradeLocate(quiz, 'somewhere', evidence), 'fail');
   });
 });

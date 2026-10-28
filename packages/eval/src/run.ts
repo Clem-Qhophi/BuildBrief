@@ -3,8 +3,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DEV_CASES } from './fixtures.js';
 import { DEV_CASES_2, GAP_PROBES } from './fixtures2.js';
+import { DEV_CASES_3 } from './fixtures3.js';
 import { HOLDOUT_CASES } from './holdout.js';
 import { HOLDOUT_CASES_2 } from './holdout2.js';
+import { HOLDOUT_CASES_3 } from './holdout3.js';
 import { runCase } from './runner.js';
 import { type CaseResult } from './cases.js';
 
@@ -15,8 +17,8 @@ function percentile(sorted: number[], p: number): number {
 
 export async function main(argv: string[], cwd: string): Promise<number> {
   const only = argv.includes('--holdout-only') ? 'holdout' : argv.includes('--dev-only') ? 'dev' : 'all';
-  const DEV_ALL = [...DEV_CASES, ...DEV_CASES_2, ...GAP_PROBES];
-  const HOLD_ALL = [...HOLDOUT_CASES, ...HOLDOUT_CASES_2];
+  const DEV_ALL = [...DEV_CASES, ...DEV_CASES_2, ...DEV_CASES_3, ...GAP_PROBES];
+  const HOLD_ALL = [...HOLDOUT_CASES, ...HOLDOUT_CASES_2, ...HOLDOUT_CASES_3];
   const cases = only === 'holdout' ? HOLD_ALL : only === 'dev' ? DEV_ALL : [...DEV_ALL, ...HOLD_ALL];
   const results: CaseResult[] = [];
   for (const c of cases) {

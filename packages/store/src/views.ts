@@ -89,8 +89,23 @@ export function rebuildViews(s: ProjectStore, projectId: string): ProjectViews {
         break;
     }
   }
-  writeView(s, 'views', views);
+  // No events = no ledger here: skip the write so pure reads in an empty
+  // directory leave no `.buildbrief/` behind.
+  if (events.length > 0) writeView(s, 'views', views);
   return views;
+}
+
+/**
+ * Revision of the most recently recorded finding. Orders by `created_at`,
+ * never by lexicographic SHA — Git hashes carry no time order and string-max
+ * silently picks a stale revision whenever the older hash sorts last.
+ */
+export function latestRevision(findings: VerificationFinding[]): string {
+  let best: VerificationFinding | undefined;
+  for (const f of findings) {
+    if (best === undefined || f.created_at > best.created_at) best = f;
+  }
+  return best?.checked_revision ?? '';
 }
 
 export function loadViews(s: ProjectStore): ProjectViews {

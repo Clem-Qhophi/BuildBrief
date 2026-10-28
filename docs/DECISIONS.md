@@ -43,6 +43,45 @@ Living log. Newest first. Status: proposed | accepted | superseded.
 - P0 demo surface = `bb` CLI + JSON/Markdown/HTML report export. Web workbench (Next.js) starts
   only after the slice rechecks green twice (blueprint hard-cut rule, §17).
 
+## ADR-013 (accepted 2026-10-28): Prompt Autopsy groups failed attempts, never accuses
+
+- One autopsy per criterion over its failed findings (`partial` /
+  `not_established` / `contradicted`), stale findings included — history is
+  the point. Fewer than two attempts is refused with a pointer to `bb fix`.
+  Output is Observed facts (ledger quotes) / Plausible causes (labeled
+  hypotheses: stall, location-guess, unmoved blocker, destroyed proof,
+  scope spill) / Unknowns (test output, agent prompts, orphan motive) plus
+  one bounded next prompt. Causes never allege intent; orphans stay
+  possibly-unrequested. Evidence spans reload from report JSONs, so autopsy
+  works on any ledger with intact reports.
+
+## ADR-012 (accepted 2026-10-28): Test-file risk parity across languages
+
+- `test_file_touched` (high risk) covers pytest conventions (`test_*.py`,
+  `*_test.py`, `tests+/` dirs, `conftest.py`) exactly as it covers JS/TS
+  (`.test.*`, `.spec.*`, `__tests__/`). Rationale: the engine is lexical and
+  language-agnostic, but path conventions are not — a deleted Python suite must
+  trigger ADR-007 like a deleted JS suite. Near-miss names (`contest.py`,
+  `latest.py`) are pinned low by unit test.
+
+## ADR-011 (accepted 2026-10-28): Comprehension map counts only live answers, shows finding as context
+
+- A map cell reaches `demonstrated` on ≥1 passing answer against a non-retired
+  quiz pinned to the current revision — regardless of the criterion's finding.
+  The finding (`supported`/`partial`/…) is displayed beside the status, not used
+  to gate it: conflating verification strength with comprehension would make
+  partial-finding criteria permanently unmeasurable. Old-revision answers never
+  count (cell degrades to `stale`); criteria with questions but no answers are
+  `untested`, with none are `unmeasured`. No percentages without denominators.
+
+## ADR-010 (accepted 2026-10-28): Quiz grading honesty
+
+- `locate` answers are graded mechanically (`gradeLocate`: file + overlapping
+  range, no partial credit). `predict`/`explain_back` stay `pending` until a
+  human grades them — no model judgment, no pseudo-scores, owner override always
+  allowed. Questions are generated only from verified findings with path evidence
+  and retire automatically when cited snippets move.
+
 ## ADR-009 (accepted 2026-10-28): Native integration via MCP + skill first, hooks template unverified
 
 - Empirically (Muse 1.4.14): only the MCP server (JSON-RPC harness), the project

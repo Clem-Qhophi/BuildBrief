@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { extractDraft, keywordsOf } from '../src/extract.js';
+import { extractDraft, keywordsOf } from '@buildbrief/domain';
 
 const BASE = {
   projectId: 'p',

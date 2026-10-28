@@ -134,6 +134,11 @@ export async function runCase(c: EvalCase): Promise<CaseResult> {
     for (const want of c.expectedOrphans) {
       if (!flagged.includes(want)) failures.push(`orphan ${want} was not flagged`);
     }
+    for (const [path, wantRisk] of Object.entries(c.expectedRisk ?? {})) {
+      const got = report.orphans.find((o) => o.path === path);
+      if (got === undefined) failures.push(`orphan ${path} was not flagged (risk ${wantRisk} asserted)`);
+      else if (got.risk !== wantRisk) failures.push(`orphan ${path}: risk ${got.risk}, want ${wantRisk}`);
+    }
     const cap = c.maxUnexpectedRisk ?? 'low';
     for (const o of report.orphans) {
       if (!c.expectedOrphans.includes(o.path)) {

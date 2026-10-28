@@ -15,8 +15,8 @@ evidence-backed fix briefs, and reverify after the patch. Full vision and author
 ```sh
 npm install
 npm run build
-npm test            # 42 unit tests (incl. MCP protocol + hook handlers)
-npm run test:eval   # 22 seeded cases: 16 dev + 4 holdout + 2 documented gaps
+npm test            # 68 unit tests (incl. MCP protocol, handlers, Studio slice, map, autopsy, evidence viewer, test runs)
+npm run test:eval   # 30 seeded cases: 22 dev + 6 holdout + 2 documented gaps (JS/TS + Python)
 ```
 
 ## The loop (5 minutes)
@@ -32,6 +32,19 @@ $BB recheck --project demo --intent <ID> --repo <REPO>   # fresh verdicts, old f
 ```
 
 Scripted demo with seeded faults: [`samples/referral-demo/DEMO.md`](samples/referral-demo/DEMO.md).
+
+## Workbench (web)
+
+```powershell
+npm run build
+$env:BB_WORKSPACE = '<project-with-a-ledger>'
+npm run web
+```
+
+Then open http://localhost:3103 in your browser. Pages read the real ledger
+(intents, runs, findings, evidence, orphan dispositions); approval and
+disposition append the same ledger events as the CLI. Details and verification
+status: [`apps/web/README.md`](apps/web/README.md).
 
 ## Layout
 

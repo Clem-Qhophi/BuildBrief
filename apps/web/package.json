@@ -1,0 +1,28 @@
+{
+  "name": "@buildbrief/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3103",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3103"
+  },
+  "dependencies": {
+    "@buildbrief/domain": "0.1.0",
+    "@buildbrief/learning": "0.1.0",
+    "@buildbrief/model-meta": "0.1.0",
+    "@buildbrief/repo": "0.1.0",
+    "@buildbrief/store": "0.1.0",
+    "@buildbrief/verifier": "0.1.0",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.10.9",
+    "@types/react": "^19.2.7",
+    "typescript": "^5.6.3"
+  }
+}

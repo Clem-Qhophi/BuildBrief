@@ -2,7 +2,8 @@
 
 Exposes the tested `bb` CLI as MCP tools: `bb_capture`, `bb_list_intents`,
 `bb_approve_intent`, `bb_get_context`, `bb_verify`, `bb_report`,
-`bb_make_fix_brief`. Each call spawns the built CLI in a child process, so the
+`bb_make_fix_brief`, `bb_explain`, `bb_quiz`, `bb_tour`, `bb_map`, `bb_autopsy`.
+Each call spawns the built CLI in a child process, so the
 MCP surface cannot drift from CLI behavior. Stdout carries JSON-RPC frames only;
 all diagnostics go to stderr.
 
