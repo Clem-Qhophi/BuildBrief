@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 // Every public and workspace page must fit the viewport width on phones:
 // no horizontal page overflow, whatever the screen size. Components that
 // are intentionally wide (data tables) scroll inside their own container.
-const routes = ['/', '/features', '/how-it-works', '/demo', '/start', '/connect', '/workspace', '/new', '/runs', '/changes', '/settings', '/quiz', '/activity', '/readiness'];
+const routes = ['/', '/features', '/how-it-works', '/demo', '/start', '/connect', '/workspace', '/new', '/runs', '/changes', '/settings', '/quiz', '/activity', '/readiness', '/connections'];
 
 test('no page overflows horizontally on phone widths', async ({ page }) => {
   for (const width of [390, 320]) {

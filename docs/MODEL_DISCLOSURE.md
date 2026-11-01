@@ -13,6 +13,15 @@ has been made from this project to date (no key in the build environment).
 
 ## How the model is constrained
 
+- Niche boundary, enforced by test (`model-meta/test/instructions.test.ts`):
+  only the verifier, CLI, web app, and the offline eval harness may depend
+  on `model-meta`. Domain, store, repo, learning, MCP, and planning stay
+  deterministic — no model dependency allowed.
+- Task-scoped instruction packs (`model-meta/src/instructions.ts`,
+  independently versioned): verdict assessment (`bb-verify-v2`, the only
+  pack with a live call site), correction scoping, understanding
+  grounding, and extraction guardrails (draft-only, ambiguity flagged).
+  Flipping a non-verify task to model use requires an ADR plus wiring.
 - Structured output only: `response_format: { type: 'json_schema', ... }`
   against the `BbVerdict` schema; non-conforming output is rejected, never parsed loosely.
 - The model returns verdicts over evidence IDs it was given; it never supplies

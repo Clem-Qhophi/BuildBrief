@@ -2,6 +2,44 @@
 
 Living log. Newest first. Status: proposed | accepted | superseded.
 
+## ADR-025 (accepted 2026-11-01): Stop hook does not fire; the gate stays advisory
+
+- Owner probe 2026-11-01 (same scratch project, same byte-clean file,
+  same session): UserPromptSubmit fired twice, including the probe
+  prompt, while a completed turn (prompt answered, session exited)
+  produced NO Stop record. Control and experiment in one session, so
+  this is a finding about the Stop event, not the file or setup.
+- Consequence: on Muse Code 1.4.14 nothing may depend on blocking a
+  turn. `bb-hook` and the guard stay advisory permanently on this
+  build; their `block` code path remains implemented and unit-tested
+  but dormant behind the proven-transport requirement, which this build
+  cannot meet. PreToolUse/PostToolUse were not probed and stay
+  UNVERIFIED (this result implies nothing about them either way).
+
+## ADR-024 (accepted 2026-11-01): Muse UserPromptSubmit hook firing proven
+
+- Owner probe 2026-11-01 (scratch project, nested matcher/hooks shape):
+  the hook fired on Muse Code 1.4.14. The captured record carries
+  `event: UserPromptSubmit`, full session id, project root, exact prompt
+  text plus sha256, and byte counts. Earlier `MalformedConfig` failures
+  were caused by PowerShell writing the file with a UTF-8 BOM, not by the
+  schema — byte-clean JSON loads.
+- Still UNVERIFIED: PreToolUse, PostToolUse, Stop and all other events;
+  elicitation rendering; block semantics. The guard and bb-hook stay
+  advisory until those are proven the same way.
+
+## ADR-023 (accepted 2026-11-01): Retire the unwired HomeEvidenceNetwork island
+
+- Owner decision (BB-080 closed as retire): `HomeEvidenceNetwork.tsx`
+  (both exports, `HomeEvidenceNetwork` and `HandoffBridge`) was never
+  imported by any route — grep across the tree found only its own
+  definition — and its `home-network*` / `handoff-*` classes exist in no
+  stylesheet, so mounting it would render unstyled markup. Deleted.
+- This corrects ADR-021's claim that the component "is live on the
+  landing page": that line was wrong (proven by grep 2026-11-01, erratum
+  in PROGRESS). ADR-021 itself is left intact as history.
+- Recovery: the file remains in git history (`8c27ce9` and earlier).
+
 ## ADR-022 (accepted 2026-11-01): Agent versions verified on the owner machine
 
 - Probbed 2026-11-01 with `--version` (read-only, no workload):

@@ -163,6 +163,30 @@ test('HTTP: quiz studio renders grounded sections for a checked project', { skip
   assert.match(activity, /No agent sessions recorded/);
   assert.match(activity, /bb init/);
 });
+
+test('HTTP: connections page names agents honestly and the guide downloads clean', { skip: !base }, async () => {
+  const page = await (await fetch(url('/connections'))).text();
+  assert.match(page, /Agent connections/);
+  assert.match(page, /Muse Code/);
+  assert.match(page, /Codex CLI/);
+  assert.match(page, /Claude Code/);
+  assert.match(page, /Run connection test/);
+  const guide = await fetch(url('/api/connections/guide'));
+  assert.equal(guide.status, 200);
+  assert.match(guide.headers.get('content-type') ?? '', /markdown/);
+  const body = await guide.text();
+  assert.match(body, /12 tools/);
+  assert.match(body, /UNVERIFIED|unverified/);
+  assert.doesNotMatch(body, /LLM_[A-Za-z0-9]/);
+});
+
+test('HTTP: connection test runs the real server on a disposable workspace', { skip: !base, timeout: 120_000 }, async () => {
+  const tested = await post('/api/connections/test', {});
+  assert.equal(tested.status, 307);
+  const target = await (await fetch(location(tested))).text();
+  assert.match(target, /Connection test passed/);
+  assert.match(target, /12 tools listed/);
+});
   const unknown = await post('/api/verify', { project, intent: 'bb_intent_nope', repo: afterUrl.searchParams.get('repo') });
   assert.equal(unknown.status, 404);
 });

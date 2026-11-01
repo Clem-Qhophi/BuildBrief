@@ -5,23 +5,17 @@ import {
   ModelError,
   type ModelProvider,
 } from './provider.js';
+import { VERIFY_SYSTEM } from './instructions.js';
 
 /**
  * Prompt builder shared by the Meta provider and the mock.
  * Versioned: any wording change bumps PROMPT_VERSION so runs stay comparable.
  */
-export const PROMPT_VERSION = 'bb-verify-v1';
+export const PROMPT_VERSION = 'bb-verify-v2';
 export const MAX_EXCERPT_CHARS = 4000;
 export const MAX_EXCERPTS = 12;
 
-const SYSTEM = [
-  'You assess whether ONE approved requirement criterion is established by the quoted',
-  'repository evidence at the pinned commit. Evidence items are the ONLY basis for a positive',
-  'claim. Rules: (1) cite only evidence ids you were given; (2) if the evidence is insufficient,',
-  'say not_established and list the exact missing proof; (3) absence is contradicted only with',
-  'directly incompatible evidence, otherwise not_established; (4) never claim production or',
-  'runtime proof from source or test evidence alone.',
-].join(' ');
+const SYSTEM = VERIFY_SYSTEM;
 
 export function buildAssessmentPrompt(input: AssessmentInput): { system: string; user: string } {
   const excerpts = input.excerpts.slice(0, MAX_EXCERPTS).map((e) => {

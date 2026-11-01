@@ -106,7 +106,8 @@ export class MetaApiProvider implements ModelProvider {
         signal: ctrl.signal,
       });
     } catch (e) {
-      throw new ModelError(`transport failure: ${(e as Error).message}`, 'transport', true);
+      const cause = (e as { cause?: { code?: string } }).cause?.code ?? (e as Error).message;
+      throw new ModelError(`transport failure: ${cause}`, 'transport', true);
     } finally {
       clearTimeout(timer);
     }

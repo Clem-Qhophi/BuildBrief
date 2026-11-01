@@ -30,7 +30,7 @@ async function ActivityAsync({ searchParams }: { searchParams: Promise<Record<st
       <h1>Agent activity</h1>
       <p className="lede">Supported session, tool, file and test events for {project}. Missing ends and silent sessions are labelled — never shown as quiet.</p>
       {sessions.length === 0 ? (
-        <div className="empty">No agent sessions recorded for this project yet. Run <code>bb init</code> in the repository to check wiring, then work with a supported agent. Events captured by hooks appear here; anything missed is reconciled against the git diff.</div>
+        <div className="empty">No agent sessions recorded for this project yet. Run <code>bb init</code> in the repository to check wiring, <a href={`/connections?project=${encodeURIComponent(project)}`}>set up an agent connection</a>, then work with a supported agent. Events captured by hooks appear here; anything missed is reconciled against the git diff.</div>
       ) : (
         <ol className="timeline">
           {rows.map((row, i) => (

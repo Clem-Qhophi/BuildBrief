@@ -102,7 +102,8 @@ async function SettingsAsync({
         Rules-based verification runs offline against local files. Explicitly
         selecting the Meta provider sends filtered request and evidence context
         to Meta. Provider and model are recorded with each run.
-        <a href="/how-it-works#privacy"> Read the data boundaries.</a>
+        <a href="/how-it-works#privacy"> Read the data boundaries.</a>{' '}
+        <a href={`/connections${repo !== '' ? `?repo=${encodeURIComponent(repo)}` : ''}`}>Set up agent connections</a>.
       </p>
       <h2>Model provider (bring your own)</h2>
       <p className="muted">

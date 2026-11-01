@@ -335,6 +335,8 @@ a { transition: color 120ms ease-out; }
   nav.side-nav::before { display: none; }
   .content { padding: 20px 14px 56px; }
   .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; }
+  .grid > * { min-width: 0; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   .brief-requirements > li { grid-template-columns: 1fr; }
   .brief-requirements .badge { justify-self: start; }
   table { display: block; overflow-x: auto; }

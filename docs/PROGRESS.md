@@ -1,5 +1,81 @@
 # Progress
 
+## 2026-11-01 Connections experience (local MCP)
+
+- `/connections` page (AppShell nav + links from Activity/Settings):
+  per-agent cards with live-detected versions, verified registration
+  commands (codex/claude CLI syntax proven via --help; muse has no stdio
+  command — manual settings.json, labelled unverified), hook truth
+  (ADR-024/025), a real server-side Test action (initialize + 12-tool
+  discovery + scratch-ledger capture + confirmation, disposable
+  workspace only), and a downloadable MCP setup guide (install paths
+  only, asserted secret-free in tests).
+- Two real defects caught by the gates and fixed: Next `redirect()`
+  inside try/catch (turned success into failure), and a phone-width grid
+  blowout from unbreakable `<pre>` lines (fixed at the design-system
+  level: grid children may shrink, pre wraps on small screens).
+- Gates: tsc 0, npm test 0 (101+14), eval 22/22+6/6, web:build 0,
+  web+HTTP 39 pass / 1 skip, Playwright 15 pass. One scare: a journey
+  failure that turned out to be a consumed fixture repo (fix commit from
+  the prior run) — reseeded, journey 4/4 green. Rule holds: reseed
+  before every journey rerun.
+
+## 2026-11-01 BB-021 live-call verdict: product path proven, account 401
+
+- Owner smoke test (1-criterion fixture, real CLI path): transport works
+  (request reaches api.llama.com), Meta answers HTTP 401 consistently
+  across 4 attempts. Our side is correct end to end; the rejection is
+  account-side (key validity, model entitlement, or Standard-mode
+  access). No successful model verdict yet; no key ever entered repo,
+  logs, or reports. Transport errors now carry cause codes (meta.ts).
+- Owner next: confirm key active + Standard mode in console, set
+  BB_META_MODEL to the exact entitled model id, retry once.
+- Gates unaffected: tsc 0, npm test 0 (101+14), eval green.
+
+## 2026-11-01 Model niche guardrails
+
+- `model-meta/src/instructions.ts`: per-task packs (verify v2
+  strengthened with the abstention ladder, contradiction bar, tier
+  ceilings; correction/understanding/extraction ready but model-forbidden
+  until an ADR + wiring). The live verdict prompt moved to the pack and
+  bumped to `bb-verify-v2` (versioning working as designed).
+- Niche boundary enforced by test: only verifier/CLI/web/eval-harness
+  may depend on model-meta; domain/store/repo/learning/mcp/planning
+  must not (the test caught eval's pre-existing dep and now documents
+  the harness exception precisely). MODEL_DISCLOSURE updated per task.
+- Gates: tsc 0, npm test 0 (101+14 pass), eval 22/22+6/6+2 gaps. No live
+  call in this step; owner smoke test still pending with owner key.
+
+## 2026-11-01 BB-020 Stop probe: absent, gate stays advisory
+
+- Same scratch project, same session: two UserPromptSubmit firings, zero
+  Stop records across a completed turn and session exit. Recorded as
+  ADR-025: blocking turns is off the table on Muse 1.4.14, permanently
+  for this build. No further Stop work without a new Muse version or a
+  documented shape change.
+- Still UNVERIFIED (not disproven): PreToolUse/PostToolUse, elicitation.
+
+## 2026-11-01 BB-020 Muse firing proven
+
+- Owner probe in a scratch project (byte-clean nested hooks.json):
+  UserPromptSubmit fired on Muse 1.4.14 with event name, session id,
+  project root, exact prompt and sha256 (ADR-024). The earlier
+  MalformedConfig was a UTF-8 BOM from PowerShell, not the schema.
+- Still UNVERIFIED: all other hook events, elicitation, block semantics.
+  Guard and bb-hook stay advisory.
+
+## 2026-11-01 BB-080 retire + BB-020 probe kit
+
+- BB-080 done: owner chose retire. `HomeEvidenceNetwork.tsx` deleted
+  (grep: zero importers, zero stylesheet classes); ADR-023 recorded, with
+  an explicit correction of ADR-021's wrong "live" line (ADR-021 itself
+  left intact). Gates: web:build 0, npm test 0 (98+14 pass).
+- BB-020 probe kit written to `.demo-tmp/hook-probe-kit.md` (Muse first):
+  reuses the payload-defensive `capture.js` as the logging hook in a
+  scratch project; owner runs one interactive prompt and reports
+  file/event/sessionId/version. A negative result is valid data.
+  Codex/Claude kits follow the Muse outcome.
+
 ## 2026-11-01 Final validation before owner commit
 
 - :3103 rebuilt + restarted on the full tree: `/`, `/quiz`, `/activity`,

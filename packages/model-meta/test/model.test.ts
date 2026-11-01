@@ -23,7 +23,7 @@ describe('model-meta', () => {
     const b = buildAssessmentPrompt(input);
     assert.equal(a.user, b.user);
     assert.ok(a.user.includes('e1'));
-    assert.equal(PROMPT_VERSION, 'bb-verify-v1');
+    assert.equal(PROMPT_VERSION, 'bb-verify-v2');
   });
 
   it('mock returns fixtures and records calls', async () => {
