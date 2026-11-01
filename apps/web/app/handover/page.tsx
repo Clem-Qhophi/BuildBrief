@@ -1,3 +1,5 @@
+import AppShell from '../components/AppShell';
+import { projectParams } from '../../lib/context';
 import type { VerificationReport } from '@buildbrief/verifier';
 import { roleTour } from '@buildbrief/learning';
 import { getViews, readReportFile, workspaceRoot } from '../../lib/ledger';
@@ -23,21 +25,21 @@ async function HandoverAsync({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const params = await searchParams;
+  const params = await projectParams(await searchParams);
   const project = params['project'] ?? '';
   const intentId = params['intent'] ?? '';
   const runId = params['run'] ?? '';
   const root = workspaceRoot();
   if (project === '' || intentId === '' || runId === '') {
     return (
-      <main>
+      <AppShell active="map" context={params}>
         <h1>Team handover</h1>
         <p className="muted">
           Needs <code>project</code>, <code>intent</code>, and <code>run</code> —
           open it from a run report. Each role gets the same evidence with the
           unknowns relevant to their job.
         </p>
-      </main>
+      </AppShell>
     );
   }
   const views = getViews(root, project);
@@ -45,10 +47,11 @@ async function HandoverAsync({
   const report = readReportFile(root, runId) as VerificationReport | null;
   if (intent === undefined || report === null) {
     return (
-      <main>
+      <AppShell active="map" context={params}>
         <h1>Team handover</h1>
         <p className="muted">Unknown intent or run in this workspace.</p>
-      </main>
+        <p><a href={`/workspace?project=${encodeURIComponent(project)}`}>Open the project overview</a> or <a href={`/runs?project=${encodeURIComponent(project)}`}>choose a checked run</a> first.</p>
+      </AppShell>
     );
   }
   const briefs = ROLES.map((role) => {
@@ -60,11 +63,11 @@ async function HandoverAsync({
     }
   });
   return (
-    <main>
+    <AppShell active="map" context={params}>
       <h1>Handover: {intent.feature_id} @ {report.checked_revision.slice(0, 7)}</h1>
-      <p className="muted">
-        Same run, four briefings. Business policy is never invented — where the
-        ledger is silent, each brief says unknown.
+      <p className="lede">
+        Same verified run, four briefings — one per role. Nothing is invented:
+        where the ledger is silent, each brief says unknown.
       </p>
       {briefs.map((b) => (
         <section key={b.role} className="section">
@@ -86,6 +89,6 @@ async function HandoverAsync({
           )}
         </section>
       ))}
-    </main>
+    </AppShell>
   );
 }

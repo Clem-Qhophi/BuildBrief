@@ -45,6 +45,21 @@ sandbox/approval protections.)
 - Honesty taxonomy: implemented+tested, implemented but browser-unverified, partial, missing, blocked, known gap. Never present mocks as backends or seeded metrics as real-world accuracy.
 - Git: never bypass ownership/sandbox safeguards; never force-push or rewrite history; owner commits from their shell.
 
+## Durable Frontend Guidelines
+
+- Server-first, zero client JS: `<details>`, query-param tabs, native form
+  POSTs before any client component; no new runtime UI dependency without a
+  written reason (see `docs/DECISIONS.md`).
+- Direction lives in `.agents/skills/bb-frontend-direction/SKILL.md`;
+  pre-commit bar in `.agents/skills/bb-web-quality-gate/SKILL.md`.
+- E2E selector strings (headings, labels, placeholders, button/link text in
+  `apps/web/e2e/journey.spec.ts`) are a contract: never rename or restyle
+  them out of existence; verify with search after frontend edits.
+- Every number on screen traces to `apps/web/lib/ledger.ts` output; rules
+  findings say rules-based; auth/billing/cloud never shown as implemented.
+- Taste skill is a gate, not a design system; no purple/blue gradients,
+  no gradient headline text, no emoji icons, motion answers actions only.
+
 ## Permanent AI Inference Guidelines
 
 - Provider abstraction first: rules (deterministic, offline) is the default; mock for tests; Meta only when explicitly selected.

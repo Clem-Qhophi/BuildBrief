@@ -215,7 +215,263 @@ role tour (WEB_PLAN phase 2 slice) → interactive-session hook firing test.
   provider end-to-end green. No key material stored or logged. Smallest
   live smoke (owner, authorized): one `bb verify --provider meta` on the
   m5c intent (2 criteria = ~2 calls), then clear the session key.
+- ADR-014 2026-10-28: default Meta host corrected to `api.llama.com`
+  (was `api.meta.ai`; POST failed on both machines, docs + key shape
+  agree). Test, `.env.example`, disclosure updated; build + model tests
+  green. Model id `muse-spark-1.3` still unverified — owner smoke pending.
+  Uncommitted; needs owner `git add` + commit.
+- Product experience M6a 2026-10-29: dark design system (`globals.css`),
+  app shell with sidebar nav + skip link (`layout.tsx`), Dashboard home
+  (stats, next action, recent runs), workflow steppers on Connect/New.
+  No backend or logic changes; every E2E selector string preserved.
+  Gates: root tsc 0, `web:build` green. Browser visual review owner-side.
+- M6a+ 2026-10-29: workflow steppers on Intent (step 3) and Run (step 4)
+  pages. Static markup only; gates re-green (`tsc -b`, `web:build`).
+- `docs/roadmap.md` 2026-10-29: hackathon slice vs commercial foundations
+  split (auth, hosted sync, hardening, billing, connectors, model ops),
+  with no-regret order. Tree re-verified `tsc -b` clean.
+- M6b 2026-10-29: flagship slice. Skills installed
+  (`.agents/skills/bb-frontend-direction`, `bb-web-quality-gate`; upstream
+  sources recorded, no text vendored); libs evaluated, zero runtime deps
+  added (shadcn/Motion/Bits/MagicUI/R3F rejected or deferred with reasons);
+  AGENTS.md durable frontend guidelines. Dashboard rebuilt as intention
+  flow + attention queue + run timeline; run page has verdict strip +
+  expandable finding cards. Gates: `tsc -b` 0, `web:build` green, all E2E
+  strings present. Visual review still owner-side.
+- M6c 2026-10-29: supporting screens. Evidence Explorer (readable cited-line
+  highlight, back-to-run link); changes review cards with recorded decisions;
+  product-language ledes on handover/map/settings; step-5 stepper on recheck.
+  Gates: `tsc -b` 0, `web:build` green, E2E/disposition strings verified.
+- M6d 2026-10-29: revision comparison on run pages. Previous stored report
+  for the same intent loads server-side; per-criterion improved / regressed /
+  unchanged / new labels from verdict ranks, with honest "new revision
+  proves nothing" copy. Gates: `tsc -b` 0, `web:build` green. Browser +
+  E2E re-run owner-side.
+- M6e 2026-10-29: Intent Studio guidance (draft/contract banner, criteria
+  explainer with must-NOT semantics) + recheck checklist notice. Criteria
+  table and all gates intact: `tsc -b` 0, `web:build` green.
+- M7a 2026-10-29: two-experience IA. `/` is now a static product site
+  (hero, problem, 5-step how-it-works, feature links, trust, FAQ, footer);
+  dashboard moved to `/workspace`; nav has Home + Dashboard. Browser
+  availability probed: none in sandbox (no browsers, no server) — visual
+  validation is owner-side by constraint. Gates: `tsc -b` 0,
+  `web:build` green.
+- M6f 2026-10-29: real identity round (owner 0/10). SVG seal + wordmark,
+  7-icon nav set, serif display type, selection/focus/microinteraction
+  detail, grouped intention flow. ADR-015 records rejections. Gates:
+  `tsc -b` 0, `web:build` green. Visual verdict owner-side.
 - Full re-certification 2026-10-28 (sandbox, TEMP override): root `tsc -b`
   0, unit 68/68, eval 22/22 + holdout 6/6 (P/R 1.00, 2 known gaps),
   `web:build` green (all routes). No source changes; UI functionally
   covered by the owner-run browser suite.
+- Milestone commit + push 2026-10-28 (owner): `b3ee211` (97 files, +6712)
+  pushed to `github.com/Clem-Qhophi/BuildBrief`, branch `master`
+  tracking `origin/master`. Junk file excluded; temp data ignored.
+
+## 2026-10-29 — Complete local product journey
+
+Owner request: a coherent product with landing page, features, a navigable app,
+operator repository connection, and no signup. Exact request captured as draft
+`bb_intent_2bae1c54c3641b070f` in project BuildBrief at the source checkout. No owner
+approval was fabricated; no formal conformance verification is claimed.
+
+Implemented and browser-checked:
+- Separate public SiteShell and server-rendered AppShell; home, features, usage
+  guide, working example, active navigation, project selection, report sections.
+- Absolute local Git-root validation, persistent connections, project cookie,
+  retained repository context, canonical report project context, inline connect
+  and verification errors. Connected the actual BuildBrief checkout through UI.
+- One-click labeled fixture scenario: isolated repository, seeded approval,
+  original check, supplied correction commit, acceptance command, fresh recheck.
+  Browser showed expiry not_established -> supported, E2_test; the partial credit
+  finding and authentication review item remain visible.
+- Evidence explorer opened the checked revision and verified the snippet hash.
+  Understanding Studio feature chooser, generation of two grounded questions,
+  and a real locate answer recorded as pass for example-reviewer.
+- Mobile breakpoint checks: home and connection grids collapse, no horizontal
+  document overflow; one main and one h1 on the homepage. Existing selector
+  contract reviewed. Quiz/approval fields have accessible labels.
+- No runtime dependency/client island added. Existing Motion evidence component,
+  CLI, MCP, and pre-existing model-provider changes preserved.
+
+Executed gates (logs in ignored .demo-tmp):
+- npm run typecheck: exit 0 (typecheck.log).
+- npm test: exit 0; 64 package tests + 4 hook tests = 68 (unit-tests.log).
+- npm run test:eval: exit 0; 22/22 dev, 6/6 holdout, 2 documented gaps (eval.log).
+  Seeded scope only; comment-mirage FP and vocabulary-miss FN remain documented.
+- npm --workspace @buildbrief/web test with loopback integration enabled: exit 0;
+  6/6 (4 connection tests, 2 real HTTP flows; web-flow-tests.log).
+- npm run web:build: exit 0, all routes (web-build-final.log).
+- git diff --check: exit 0 (line-ending notices only).
+
+Environment: system TEMP caused baseline fixture Git config writes to fail.
+Repeating with workspace .test-tmp TEMP/TMP passed without changing ACLs or Git
+ownership safeguards. Sandbox direct loopback fetches were denied EACCES;
+HTTP tests passed in the approved elevated invocation. The connected browser
+was available and used for actual UI verification. The maintained Playwright
+suite was extended; the whole owner-run mutation journey was not rerun here.
+
+Remaining: live Meta provider validation, native hook lifecycle activation,
+participant-only rules/submission review, fresh-user usability trial, recording,
+and publishing/submission. No live model call, code commit, push, or deployment
+was made. See docs/PRODUCT_EXPERIENCE.md and ADR-017.
+
+## 2026-10-30 — Idea-first acceptance and photographic landing story
+
+- Idea capture now precedes a repository: original context, audience, requested
+  behavior, boundaries, questions, draft review, explicit approval, and a
+  downloadable agent handoff. Connecting code later returns to the same brief.
+- Public GitHub snapshot import complements local folders. Password recovery is
+  the primary executable example, referral the secondary. A failed relevant
+  acceptance command cannot leave a fresh source-only supported finding; exact
+  coverage and revision checks are tested. Human acceptance decisions append
+  separate events and never rewrite findings.
+- The neutral public site and readable product brief are recorded in ADR-018.
+  The owner's subsequent request for scroll storytelling is implemented in
+  ADR-019: four consistent generated/edited photographic scenes, controlled by
+  normal scrolling, with chapter navigation and an explicit static reading view.
+  Less opening copy; actual idea/repository/example paths remain functional.
+- Browser critique changed the hero composition, photo framing, phone navigation,
+  annotation placement, and persistent reading-mode control. Actual 1440x900,
+  1280x800, and 390x844 CSS viewport checks passed the observed layout bounds.
+  Reduced motion and JavaScript-disabled reading/navigation were exercised;
+  temporary browser overrides were restored. Screenshots and limits are listed
+  in docs/PRODUCT_VALIDATION.md, not inferred from a build.
+- Final executed gates: typecheck exit 0; npm test exit 0 (70 package tests plus
+  4 handlers); seeded eval exit 0 (22 dev, 6 holdout, 2 documented gaps); web test
+  exit 0 (20 passed including six live loopback integrations); production web
+  build exit 0; diff check exit 0. Logs use the .demo-tmp/story-* names.
+- No new runtime package, paid BuildBrief model call, owner-source commit, push,
+  deployment, or submission. Native Muse capture remains a separately scoped
+  task in docs/MUSE_PARALLEL_PROMPT.md; no Muse-owned file was changed here.
+- Owner requests remain draft, including bb_intent_c0a20d67347f0d4436 for the
+  visual story. This records implementation/testing, not owner acceptance.
+
+## 2026-10-31 Quiz Studio gap audit (Phase 1) + build (Phase 2)
+
+- Phase 1 ran as a workflow: 5 doc tracers, a falsification critic, one
+  gap follow-up, and a synthesis. Only the blueprint scope returned complete
+  evidence; the decisions/product-docs/webplan/research scopes did not, so
+  the matrix below lists only critic-confirmed rows. Unverified this pass:
+  ADRs beyond ADR-014/020, PRODUCT docs beyond the run and map pages,
+  WEB_PLAN beyond role-tour and no-scores, and the research PDFs.
+- Confirmed implemented+tested: rules VERIFY path, FIX+RECHECK, ADR-020
+  TraceAtlas, ADR-014 Meta provider shape, run report page, /map
+  Understanding Studio, role tour + handover, counts-only no-score map,
+  mechanical citation/adjudication, stored evidence rows, seeded benchmark
+  (22/22 dev, 6/6 holdout at that time). One drift noted: docs/META_SETUP.md
+  still documents the old api.meta.ai URL while code uses api.llama.com.
+- Claimed-gap dispositions: (a) quiz has no workspace-level entry -
+  CONFIRMED, no apps/web/app/quiz existed; (b) Settings shows key presence
+  without setup help - CONFIRMED; (c) dead code - CORRECTED: ScrollStory.tsx
+  and lib/story.ts are dead, HomeEvidenceNetwork.tsx is live on the landing
+  page; (d) Features Understanding Studio links to a docs anchor -
+  CONFIRMED at apps/web/app/features/page.tsx.
+- Phase 2 built the Quiz Studio: apps/web/lib/study.ts (aggregateCells,
+  quizTypeCounts) with apps/web/test/study.test.mjs (3 tests), a server-only
+  apps/web/app/quiz/page.tsx (summary, by-feature, by-category, general
+  mixed; empty states name the next action), AppShell nav entry
+  Test yourself, and the Features link now points at /quiz.
+  Extended apps/web/test/http.test.mjs (quiz studio render on a checked
+  example) and apps/web/e2e/responsive.spec.ts (/quiz route).
+- Phase 2 gates, each by real exit code: typecheck 0; web tests 21 pass,
+  0 fail, 7 HTTP skip without a live server; npm run build 0; npm test 0
+  (70 + 7 pass); test:eval 0 (dev 22/22, holdout 6/6, 2 documented gaps);
+  web:build 0 with /quiz in the route list. Sandbox Temp is not writable,
+  so suite runs used a .demo-tmp temp override; the first eval attempt
+  failed on that environment limit, not on code.
+
+## 2026-10-31 Quiz Studio Phases 3-5: Settings BYOK, dead-code retirement, hardening
+
+- Phase 3 extended Settings with a read-only Model provider section: rules
+  default offline, Meta only when selected in a verify form with a key set,
+  effective model from BB_META_MODEL or META_DEFAULT_MODEL, PowerShell setup
+  instructions, and no form that accepts or stores a key. No live Meta call.
+- Phase 4 retired dead code: deleted ScrollStory.tsx, lib/story.ts, and
+  test/story.test.mjs after grep confirmed no route imports them. The
+  proposal also named HomeEvidenceNetwork.tsx, but it is live on the landing
+  page and stays; e2e story.spec.ts stays because it covers the live
+  TraceAtlas map. Recorded as ADR-021.
+- Phase 5 fixed a docs truth drift the audit surfaced: META_SETUP.md now
+  documents the api.llama.com default and BB_META_API_KEY precedence per
+  code. MODEL_DISCLOSURE.md needed no change. KNOWN_ISSUES.md keeps its
+  dated Oct 27 row (accurate history; ADR-014 records the correction).
+- Final gates, each by real exit code: typecheck 0; web tests 19 pass,
+  0 fail, 7 HTTP skip without a live server; npm test 0; test:eval 0
+  (dev 22/22, holdout 6/6, 2 documented gaps); web:build 0 with /quiz and
+  /settings in the route list. Quality gate rechecked on the quiz and
+  settings pages; no e2e selector renamed.
+
+## 2026-10-31 Quiz Studio loopback and browser handoff (pending owner run)
+
+- Not executed in the agent sandbox: listening sockets are denied there, so
+  no disposable server could start and no browser exists. The HTTP suite
+  (including the new quiz-studio test), the Playwright responsive and journey
+  specs, and the desktop + 390px /quiz screenshots are committed and
+  skip-gated, awaiting the owner run below. Unit, eval, and build gates are
+  green above; nothing here upgrades them to a live-server claim.
+- Exact owner run: copy .demo-tmp/bb-video-workspace to a NEW .demo-tmp dir
+  (never the repo-root workspace), start it with node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3106 and BB_WORKSPACE pointing at the copy, then BB_WEB_TEST_URL=http://127.0.0.1:3106 plus E2E_REPO at a fresh seeded repo for npm --workspace @buildbrief/web test; reseed a throwaway repo per journey guidance and run npx playwright test --config apps/web/e2e/playwright.config.ts --workers=1. Record exit codes and counts here.
+
+## 2026-11-01 Verification: live-server evidence supplied + tracker corrections
+
+- Owner-side verification 2026-11-01: disposable workspace on :3106 +
+  fresh-seeded repo. Web+HTTP 26 pass / 0 fail / 1 skipped; Playwright
+  single-worker 15 passed. :3103 restarted on the new build: `/`, `/quiz`,
+  `/settings` 200, all 9 core routes 200, browser console 0 errors.
+- Erratum to the 2026-10-31 entries above: `HomeEvidenceNetwork.tsx` is
+  NOT live on the landing. Grep finds only its own definition; the landing
+  imports TraceAtlas (`app/page.tsx:3`). History is not rewritten; the two
+  deleted files stay retired under ADR-021, HomeEvidenceNetwork awaits the
+  owner's retire-or-keep decision (BB-080 partial).
+- Tracker reconciled: BB-061 and BB-070 marked done with the evidence in
+  this entry; BB-080 marked partial as above. `docs/BUILD_REPORT.md` is
+  still missing (agent chat close-out is not the file).
+
+## 2026-10-31 BB-001 baseline audit (no code except one test assertion)
+
+- Tree: master b3ee211, ~100 uncommitted files (restore+fix pass, Quiz
+  Studio, Settings BYOK, audit fixes). Rollback: git HEAD plus
+  .demo-tmp/full-revert-backup-20261031-200801 and landing-backup. BB-000
+  waived by owner instruction to start; no commit made.
+- Capability matrix (status + proof, all re-verified this pass):
+  capture /start, /new, MCP bb_capture: implemented+tested (idea/capture
+  tests, cli tests, mcp.test.ts, journey N1-N2, http N1). Muse capture
+  hook: handler implemented+tested (7 handler tests); live lifecycle
+  firing UNVERIFIED (see docs/MUSE_CAPTURE_VALIDATION.md). Approval +
+  versioning: implemented+tested (named actor, no self-approval; journey,
+  http). Verify rules: implemented+tested (verifier 66-93, journey 79-94,
+  http). Verify mock: implemented+tested (provider option + tests).
+  Verify meta: implemented, live call BLOCKED (no key; shape refusal
+  tested model.test.ts:59-65; wrong endpoint drift fixed in META_SETUP).
+  Acceptance commands + recorded runs: implemented+tested (runAcceptance,
+  genuine reverify commits real fix, http node expiry.check.mjs:113).
+  Orphan triage: implemented+tested (reverse check, /changes dispose,
+  eval orphan precision 1.00). Correction packs: implemented+tested
+  (verifier 95-117, journey 103-144). Prompt autopsy: implemented+tested
+  (verifier autopsy.ts + tests, CLI bb_autopsy, MCP wired). Recheck:
+  implemented+tested (recheck.completed, journey reverify flip).
+  Evidence viewer: implemented+tested (journey N3, http evidence hash).
+  Handover/role tours: implemented+tested (journey 152-164, http 126-129,
+  learning 177-187). Explanation + quiz + map: implemented+tested at
+  unit level (learning 119-175, study 3 tests) and map HTTP; quiz-page
+  HTTP assertions skip-gated without a server. MCP inventory: 12 tools
+  (bb_capture, bb_list_intents, bb_approve_intent, bb_get_context,
+  bb_verify, bb_report, bb_make_fix_brief, bb_explain, bb_quiz, bb_tour,
+  bb_map, bb_autopsy) - no bb_intake anywhere. CLI surface:
+  implemented+tested. GitHub import: unit-tested; live import
+  skip-gated (needs BB_WEB_TEST_GITHUB=1). Ledger export: tested
+  (journey settings download). Settings/provider: working incl. BYOK
+  section (new test asserts /Model provider/ on /settings).
+- M4e/M5/M5c reconciliation: M4e conditions hold (demo-seed guards
+  demo-seed.mjs:32-50, output truncation actions.ts:56, viewport
+  layout.tsx:4, journey N/A-N4 + responsive spec present; browser parts
+  still owner-gated). M5 stay-conditional: browser run, live Meta key,
+  and baseline commit remain owner-side. M5c genuine-fix journey intact
+  (journey.spec.ts:118-129 commits real fix and reverifies).
+- Gates this pass, real exit codes: npm run build 0; npm test 0 (70+7
+  pass, 0 fail); test:eval 0 (dev 22/22, holdout 6/6, 2 gaps);
+  web:build 0 (/quiz, /map, /settings in route list); web tests 19
+  pass, 0 fail, 7 HTTP skip. HTTP/Playwright not executed in sandbox
+  (listening sockets denied); last evidence PRE-5 (24 pass/1 skip,
+  13+2) stands unconfirmed, not contradicted.

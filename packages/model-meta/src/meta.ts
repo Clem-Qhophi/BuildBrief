@@ -11,7 +11,7 @@ import {
   validateModelVerdict,
 } from './provider.js';
 
-export const META_DEFAULT_BASE = 'https://api.meta.ai/v1';
+export const META_DEFAULT_BASE = 'https://api.llama.com/v1';
 export const META_DEFAULT_MODEL = 'muse-spark-1.3';
 
 export interface MetaConfig {

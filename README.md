@@ -5,7 +5,8 @@ against revision-pinned code evidence, flag possibly-unrequested changes, produc
 evidence-backed fix briefs, and reverify after the patch. Full vision and authority:
 [`MASTER_BLUEPRINT.md`](MASTER_BLUEPRINT.md).
 
-> Status (2026-10-27): working P0 vertical slice via CLI + deterministic benchmark.
+> Status (2026-10-29): local web product with public pages, persistent repository
+> connections, a working before/after example, and the existing CLI/MCP engine.
 > Meta `muse-spark-1.3` provider is implemented against validated official docs;
 > live calls need `BB_META_API_KEY` (see `.env.example`). No fake metrics anywhere:
 > numbers below are measured by `npm run test:eval`.
@@ -37,14 +38,22 @@ Scripted demo with seeded faults: [`samples/referral-demo/DEMO.md`](samples/refe
 
 ```powershell
 npm run build
-$env:BB_WORKSPACE = '<project-with-a-ledger>'
 npm run web
 ```
 
-Then open http://localhost:3103 in your browser. Pages read the real ledger
+Then open http://localhost:3103 in your browser. **Start with your idea** creates
+a brief before any repository exists. Review and approve it, download the agent
+handoff, and connect the code later. Or connect a public GitHub URL/local checkout,
+or try the interactive password-recovery example. Referral is a secondary case.
+No existing ledger or signup is required. Optionally set
+`BB_WORKSPACE` to choose a different local ledger directory before starting.
+
+Pages read the real ledger
 (intents, runs, findings, evidence, orphan dispositions); approval and
 disposition append the same ledger events as the CLI. Details and verification
 status: [`apps/web/README.md`](apps/web/README.md).
+Product walkthrough and remaining competition priorities:
+[`docs/PRODUCT_EXPERIENCE.md`](docs/PRODUCT_EXPERIENCE.md).
 
 ## Layout
 

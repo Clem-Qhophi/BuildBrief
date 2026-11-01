@@ -1,6 +1,10 @@
+import AppShell from '../components/AppShell';
+import { projectParams } from '../../lib/context';
 import { execFileSync } from 'node:child_process';
 import { headSha } from '@buildbrief/repo';
+import { META_DEFAULT_MODEL } from '@buildbrief/model-meta';
 import { ledgerExists, listProjects, workspaceRoot } from '../../lib/ledger';
+import { projectName } from '../../lib/presentation';
 import { openProjectStore, readEvents } from '@buildbrief/store';
 
 export const dynamic = 'force-dynamic';
@@ -41,7 +45,7 @@ async function SettingsAsync({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const params = await searchParams;
+  const params = await projectParams(await searchParams);
   const root = workspaceRoot();
   const repo = params['repo'] ?? '';
   const hasLedger = ledgerExists(root);
@@ -53,9 +57,9 @@ async function SettingsAsync({
     projects = listProjects(root);
   }
   return (
-    <main>
+    <AppShell active="settings" context={params}>
       <h1>Settings & connection status</h1>
-      <p className="muted">Read-only status. Nothing here uploads code or changes providers.</p>
+      <p className="lede">Read-only status: provider, privacy, workspace, and exports. Nothing here uploads code or changes providers.</p>
       <table>
         <tbody>
           <tr>
@@ -64,7 +68,7 @@ async function SettingsAsync({
           </tr>
           <tr>
             <td>Ledger</td>
-            <td>{hasLedger ? `${eventCount} events, projects: ${projects.join(', ') || 'none'}` : 'no ledger in this workspace'}</td>
+            <td>{hasLedger ? `${eventCount} events, projects: ${projects.map(projectName).join(', ') || 'none'}` : 'no ledger in this workspace'}</td>
           </tr>
           <tr>
             <td>Repository</td>
@@ -95,11 +99,37 @@ async function SettingsAsync({
       </p>
       <h2>Privacy</h2>
       <p className="muted">
-        Repository contents stay on this machine: verification reads local
-        files, and only the deterministic engine runs by default. The Meta
-        provider sends evidence excerpts to Meta only when you pick it and set
-        a key — see <code>docs/PRIVACY.md</code> and <code>docs/MODEL_DISCLOSURE.md</code>.
+        Rules-based verification runs offline against local files. Explicitly
+        selecting the Meta provider sends filtered request and evidence context
+        to Meta. Provider and model are recorded with each run.
+        <a href="/how-it-works#privacy"> Read the data boundaries.</a>
       </p>
-    </main>
+      <h2>Model provider (bring your own)</h2>
+      <p className="muted">
+        Default: the deterministic rules engine, fully offline. Nothing leaves
+        this machine unless you choose otherwise. Meta is used only when you
+        select the meta provider in a verify form and a key is configured;
+        provider and model are recorded on every run.
+      </p>
+      <table>
+        <tbody>
+          <tr>
+            <td>Meta API key</td>
+            <td>{keyPresence()}</td>
+          </tr>
+          <tr>
+            <td>Effective model</td>
+            <td><code>{process.env['BB_META_MODEL'] ?? META_DEFAULT_MODEL}</code> (override with BB_META_MODEL)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p className="muted">To configure the key for this server session:</p>
+      <pre>{'$env:BB_META_API_KEY = "<your key>"\n# then restart the server so the new session picks it up'}</pre>
+      <p className="muted">
+        Never share or commit the key. Meta calls may incur charges and send
+        only filtered requirement and evidence context. Without a key, Meta
+        verification fails loudly instead of pretending to check.
+      </p>
+    </AppShell>
   );
 }

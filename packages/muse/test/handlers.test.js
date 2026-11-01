@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,5 +56,39 @@ describe('hook handlers', () => {
   it('guard never blocks and never crashes on garbage', async () => {
     const r = JSON.parse(await run(GUARD, '{{{garbage'));
     assert.equal(r.decision, 'allow');
+  });
+
+  it('capture records sha256 of the exact full prompt and flags truncation', async () => {
+    const { createHash } = await import('node:crypto');
+    const dir = mkdtempSync(join(tmpdir(), 'bb-hook-'));
+    const full = `synthetic hook probe ${'x'.repeat(5000)}`;
+    await run(CAPTURE, JSON.stringify({ prompt: full }), { BB_HOOK_LOG_DIR: dir });
+    const rec = JSON.parse(readFileSync(join(dir, 'captured.jsonl'), 'utf8'));
+    assert.equal(rec.prompt, full.slice(0, 4000));
+    assert.equal(rec.promptLength, full.length);
+    assert.equal(rec.truncated, true);
+    assert.equal(rec.promptHash, createHash('sha256').update(full, 'utf8').digest('hex'));
+  });
+
+  it('capture preserves hook provenance and never approves', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bb-hook-'));
+    await run(
+      CAPTURE,
+      JSON.stringify({ prompt: 'synthetic provenance probe', session_id: 'sess-123', cwd: '/tmp/demo-proj' }),
+      { BB_HOOK_LOG_DIR: dir },
+    );
+    const rec = JSON.parse(readFileSync(join(dir, 'captured.jsonl'), 'utf8'));
+    assert.equal(rec.prompt, 'synthetic provenance probe');
+    assert.equal(rec.source, 'hook');
+    assert.equal(rec.sessionId, 'sess-123');
+    assert.equal(rec.projectRoot, '/tmp/demo-proj');
+    assert.ok(!('approved' in rec) && !('state' in rec) && !('approval' in rec));
+  });
+
+  it('capture exits 0 even when the log directory is unwritable', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'bb-hook-'));
+    const blocker = join(dir, 'blocker');
+    writeFileSync(blocker, 'not a directory', 'utf8');
+    await run(CAPTURE, JSON.stringify({ prompt: 'unwritable probe' }), { BB_HOOK_LOG_DIR: blocker });
   });
 });

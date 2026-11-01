@@ -61,6 +61,6 @@ describe('model-meta', () => {
     assert.throws(() => metaConfigFromEnv({ BB_META_API_KEY: 'nope' }), /unexpected shape/);
     const cfg = metaConfigFromEnv({ BB_META_API_KEY: 'LLM_123_secretpart' });
     assert.equal(cfg.model, 'muse-spark-1.3');
-    assert.equal(cfg.baseUrl, 'https://api.meta.ai/v1');
+    assert.equal(cfg.baseUrl, 'https://api.llama.com/v1');
   });
 });

@@ -5,9 +5,9 @@ Build Brief calls Meta only through `MetaApiProvider`
 https://dev.meta.ai/docs/authentication, `/docs/models`,
 `/docs/structured-output`, `/docs/pricing-rate-limits`:
 
-- Endpoint `POST https://api.meta.ai/v1/chat/completions` (OpenAI-compatible).
+- Endpoint `POST https://api.llama.com/v1/chat/completions` (OpenAI-compatible; override with `BB_META_BASE_URL`; the older `api.meta.ai` default was retired in ADR-014).
 - Model `muse-spark-1.3`, Standard mode (content NOT used for training).
-- Auth `Authorization: Bearer $MODEL_API_KEY`; keys look like `LLM_<id>_<secret>`.
+- Auth `Authorization: Bearer` key in `BB_META_API_KEY` (fallback `MODEL_API_KEY`); keys look like `LLM_<id>_<secret>`.
 - Structured output via `response_format: {type: "json_schema", ...}`.
 - Pricing (Standard, per 1M): input $1.25, cached input $0.15, output $4.25.
 

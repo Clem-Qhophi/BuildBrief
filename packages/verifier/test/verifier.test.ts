@@ -155,6 +155,46 @@ describe('verify pipeline', () => {
     assert.ok(renderMarkdown(report).includes('No test runs recorded'));
   });
 
+  it('a relevant failed acceptance command prevents source-only green without inventing contradiction', async () => {
+    const { root, base } = seedRepo();
+    const revision = headSha(root) as string;
+    const report = await verify({ projectId: 'p1', intent: intent(), root, provider: new RuleAssessor(), baseRevision: base,
+      testRuns: [{ run: recordTestRun({ id: 'failed-acceptance', revision, command: ['node', 'acceptance.mjs'], exit_code: 1,
+        passed: 1, failed: 1, log: 'pass: fresh code\nFAIL: expected expiry\n', started_at: '2026-10-29T00:00:00Z', finished_at: '2026-10-29T00:00:01Z' }), covers: ['src/referral.js'] }],
+    });
+    const generation = report.results.find((r) => r.criterion.id === 'c-gen');
+    assert.equal(generation?.finding.finding, 'not_established');
+    assert.equal(generation?.finding.evidence_grade, 'E1_source');
+    assert.ok(generation?.evidence.some((e) => e.path === 'src/referral.js'));
+    assert.match(generation?.finding.rationale ?? '', /acceptance command failed/);
+    assert.match(generation?.finding.rationale ?? '', /does not identify the failing criterion/);
+  });
+
+  it('test coverage does not upgrade sibling source files or apply failures from a different revision', async () => {
+    const { root, base } = seedRepo();
+    const approved = intent();
+    approved.criteria.push({ id: 'c-auth', text: 'Authentication check exists', keywords: ['check'] });
+    const report = await verify({ projectId: 'p1', intent: approved, root, provider: new RuleAssessor(), baseRevision: base,
+      testRuns: [{ run: recordTestRun({ id: 'passing-declared-file', revision: headSha(root) as string, command: ['node', 'check.mjs'], exit_code: 0,
+        passed: 1, failed: 0, log: 'pass: code generation\n', started_at: '2026-10-29T00:00:00Z', finished_at: '2026-10-29T00:00:01Z' }), covers: ['src/referral.js'] },
+      { run: recordTestRun({ id: 'old-failure', revision: base, command: ['node', 'old-check.mjs'], exit_code: 1,
+        passed: 0, failed: 1, log: 'FAIL: old check\n', started_at: '2026-10-28T00:00:00Z', finished_at: '2026-10-28T00:00:01Z' }), covers: ['src/referral.js'] }],
+    });
+    assert.equal(report.results.find((r) => r.criterion.id === 'c-gen')?.finding.finding, 'supported');
+    assert.ok(report.results.flatMap((r) => r.evidence).filter((e) => e.path === 'src/auth.js').every((e) => e.tier === 'E1_source'));
+    assert.ok(report.results.some((r) => r.evidence.some((e) => e.path === 'src/auth.js')), 'the sibling path was actually retrieved');
+  });
+
+  it('a zero-exit command reporting failures is not passing test evidence', async () => {
+    const { root } = seedRepo();
+    const report = await verify({ projectId: 'p1', intent: intent(), root, provider: new RuleAssessor(),
+      testRuns: [{ run: recordTestRun({ id: 'inconsistent-exit', revision: headSha(root) as string, command: ['node', 'check.mjs'], exit_code: 0,
+        passed: 1, failed: 1, log: 'pass: first check\nFAIL: second check\n', started_at: '2026-10-29T00:00:00Z', finished_at: '2026-10-29T00:00:01Z' }), covers: ['src/referral.js'] }],
+    });
+    assert.equal(report.results.find((r) => r.criterion.id === 'c-gen')?.finding.finding, 'not_established');
+    assert.ok(report.results.flatMap((r) => r.evidence).every((e) => e.tier !== 'E2_test'));
+  });
+
   it('refuses to verify unapproved intent', async () => {
     const { root } = seedRepo();
     const draft = intent();

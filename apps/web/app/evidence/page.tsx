@@ -1,3 +1,5 @@
+import AppShell from '../components/AppShell';
+import { projectHref, projectParams } from '../../lib/context';
 import { readReportFile, workspaceRoot } from '../../lib/ledger';
 import { viewEvidence } from '@buildbrief/repo';
 
@@ -16,20 +18,20 @@ async function EvidenceAsync({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const params = await searchParams;
+  let params = await projectParams(await searchParams);
   const runId = params['run'] ?? '';
   const evidenceId = params['evidence'] ?? '';
-  const repo = params['repo'] ?? '';
   const root = workspaceRoot();
-  if (runId === '' || evidenceId === '' || repo === '') {
+  if (runId === '' || evidenceId === '') {
     return (
-      <main>
+      <AppShell active="runs" context={params}>
         <h1>Evidence viewer</h1>
         <p className="muted">Needs <code>run</code>, <code>evidence</code>, and a local <code>repo</code> path. Open it from a run report.</p>
-      </main>
+      </AppShell>
     );
   }
   const report = readReportFile(root, runId) as {
+    project_id: string;
     checked_revision: string;
     results: {
       criterion: { id: string };
@@ -51,12 +53,15 @@ async function EvidenceAsync({
   } | null;
   if (report === null) {
     return (
-      <main>
+      <AppShell active="runs" context={params}>
         <h1>Run not found</h1>
         <p className="muted">No stored report <code>{runId}</code>.</p>
-      </main>
+        <p><a href="/runs">Open Checks &amp; evidence</a> to choose a stored run.</p>
+      </AppShell>
     );
   }
+  params = await projectParams({ ...await searchParams, project: report.project_id });
+  const repo = params['repo'] ?? '';
   let pointer: {
     id: string;
     path?: string;
@@ -76,23 +81,26 @@ async function EvidenceAsync({
   }
   if (pointer === undefined) {
     return (
-      <main>
+      <AppShell active="runs" context={params}>
         <h1>Evidence not found</h1>
         <p className="muted"><code>{evidenceId}</code> is not cited by run <code>{runId}</code>.</p>
-      </main>
+        <p><a href={`/run/${encodeURIComponent(runId)}`}>Back to the run report</a> to choose cited evidence.</p>
+      </AppShell>
     );
   }
+  if (!repo) return <AppShell active="runs" context={params}><h1>Evidence viewer</h1><p className="notice">This report has no saved repository connection. <a href="/connect">Connect the repository</a>, then reopen this evidence from the report.</p></AppShell>;
   const view = viewEvidence({ repo, revision: report.checked_revision, pointer });
   const covering = pointer.test_run_id !== undefined
     ? (report.test_runs ?? []).find((t) => t.run.id === pointer.test_run_id)
     : undefined;
   return (
-    <main>
-      <h1>Evidence <code>{view.pointerId}</code></h1>
-      <p className="muted">
+    <AppShell active="runs" context={params}>
+      <h1>Evidence: {view.path}</h1>
+      <p className="lede">
         {view.path}
         {view.line_start !== undefined ? `#L${view.line_start}-${view.line_end ?? view.line_start}` : ''} [{view.tier}] — {view.description}
       </p>
+      <p><a href={projectHref(`/run/${encodeURIComponent(runId)}`, params)}>Back to the run report</a></p>
       {pointer.test_run_id !== undefined ? (
         <p className="muted">
           {covering === undefined
@@ -110,13 +118,13 @@ async function EvidenceAsync({
           <p className="muted">{view.hashCheck}</p>
           <pre>
             {(view.lines ?? []).map((l) => (
-              <div key={l.n} style={l.cited ? { background: '#eef6ee' } : undefined}>
+              <div key={l.n} style={l.cited ? { background: '#edf4f0', borderLeft: '3px solid var(--accent)' } : undefined}>
                 {String(l.n).padStart(4, ' ')}  {l.text}
               </div>
             ))}
           </pre>
         </>
       )}
-    </main>
+    </AppShell>
   );
 }

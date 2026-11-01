@@ -31,4 +31,30 @@ native prompt capture works until an interactive session demonstrably appends
 a record. The verified integration path for M2 is: MCP server (tested),
 project skill (`muse skills validate`: valid), handlers (unit-tested,
 payload-defensive). Live firing test = one interactive Muse session with the
-template installed, then inspect `.buildbrief/captures.jsonl`.
+template installed, then inspect the hook log. A direct handler unit test or
+MCP harness run is NOT proof of a live Muse lifecycle event.
+
+## 2026-10-30 re-validation (no live firing observed)
+
+- The `muse` binary is not invokable from this sandbox (not on PATH for the
+  sandbox user; the owner install dir is not listable), so `muse --version`
+  and `muse exec` could not be re-run here. Installed version stays
+  repo-recorded as 1.4.14 (2026-10-28) until the owner re-confirms.
+- Official docs (`dev.meta.ai/docs/muse-code/extending`, fetched 2026-10-30)
+  still list `UserPromptSubmit` among the lifecycle events; the full inner
+  `hooks.json` schema is not published there. Independent third-party reports
+  corroborate the Claude-compatible nested shape already in the template, but
+  that is corroboration, not a live firing. No schema-required edit was made
+  to `.muse/hooks.json`.
+- `capture.js` now records, per event: `at`, `source: 'hook'`,
+  probed `event` name (default `'unknown'`), `prompt` (exact text, truncated
+  to 4000 chars), `promptLength` (full length), `truncated` flag,
+  `promptHash` (sha256 hex of the FULL exact text, pre-truncation),
+  `rawBytes`, plus `sessionId` / `projectRoot` / `agent` only when the
+  payload carries them. Append failures are swallowed; the handler always
+  exits 0 so a broken probe log can never block a user prompt.
+- Known gap (unchanged): the hook log is a probe log, not a ledger ingest.
+  Nothing pipes `captured.jsonl` into `bb capture` yet; the operator bridge
+  is `bb capture --source hook --session <id> --prompt-file <prompt>`, which
+  yields completeness `hook_exact` and state `draft`. See
+  `docs/MUSE_CAPTURE_VALIDATION.md` for the isolated demo and verdict.

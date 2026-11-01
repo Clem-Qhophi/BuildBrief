@@ -1,7 +1,13 @@
+import AppShell from '../../components/AppShell';
+import ProductBrief from '../../components/ProductBrief';
+import TraceAtlas from '../../components/TraceAtlas';
+import { atlasFromReport } from '../../../lib/atlas';
+import { projectParams } from '../../../lib/context';
 import type { CorrectionPack, IntentVersion } from '@buildbrief/domain';
 import type { VerificationReport } from '@buildbrief/verifier';
 import { explainFeature, roleTour } from '@buildbrief/learning';
-import { getViews, listQuizzes, listResponses, readReportFile, workspaceRoot } from '../../../lib/ledger';
+import { getViews, listQuizzes, listResponses, listRuns, listReviewDecisions, readReportFile, workspaceRoot } from '../../../lib/ledger';
+import EvidenceStrand from '../../components/EvidenceStrand';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,7 +106,7 @@ function UnderstandBlock({
   quizzes: ReturnType<typeof listQuizzes>;
   responses: ReturnType<typeof listResponses>;
 }) {
-  const self = `?project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}`;
+  const self = `?view=technical&project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}`;
   return (
     <>
       <h3>What this run establishes</h3>
@@ -157,8 +163,8 @@ function UnderstandBlock({
               <input type="hidden" name="quiz" value={q.id} />
               <input type="hidden" name="run" value={runId} />
               {repo !== '' ? <input type="hidden" name="repo" value={repo} /> : null}
-              <input type="text" name="actor" placeholder="Your name" required />{' '}
-              <input type="text" name="text" placeholder={q.type === 'locate' ? 'file path and line range' : 'answer in your own words'} size={48} required />{' '}
+              <label>Your name <input type="text" name="actor" placeholder="Your name" required /></label>{' '}
+              <label>Your answer <input type="text" name="text" placeholder={q.type === 'locate' ? 'file path and line range' : 'answer in your own words'} size={48} required /></label>{' '}
               <button type="submit">Answer</button>
             </form>
           )}
@@ -174,7 +180,7 @@ function UnderstandBlock({
                   <input type="hidden" name="response" value={r.id} />
                   <input type="hidden" name="run" value={runId} />
                   {repo !== '' ? <input type="hidden" name="repo" value={repo} /> : null}
-                  <input type="text" name="by" placeholder="Grader name" required />{' '}
+                  <label>Grader name <input type="text" name="by" placeholder="Grader name" required /></label>{' '}
                   <button type="submit" name="grade" value="pass">Pass</button>{' '}
                   <button type="submit" name="grade" value="fail">Fail</button>
                 </form>
@@ -195,11 +201,10 @@ async function RunAsync({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { id } = await params;
-  const query = await searchParams;
-  const project = query['project'] ?? '';
-  const repoDefault = query['repo'] ?? '';
+  let query = await projectParams(await searchParams);
   const root = workspaceRoot();
   const report = readReportFile(root, id) as {
+    project_id: string;
     run_id: string;
     checked_revision: string;
     requirement_version_id: string;
@@ -212,12 +217,16 @@ async function RunAsync({
   } | null;
   if (report === null) {
     return (
-      <main>
+      <AppShell active="runs" context={query}>
         <h1>Run not found</h1>
         <p className="muted">No stored report <code>{id}</code>.</p>
-      </main>
+        <p><a href="/runs">Open Checks &amp; evidence</a> to choose a stored run, or <a href="/workspace">open the project overview</a>.</p>
+      </AppShell>
     );
   }
+  query = await projectParams({ ...await searchParams, project: report.project_id });
+  const project = query['project'] ?? '';
+  const repoDefault = query['repo'] ?? '';
   const reportFindingIds = new Set(report.results.map((r) => r.finding.id));
   const views = project === '' ? null : getViews(root, project);
   const packs: CorrectionPack[] = views === null
@@ -227,6 +236,8 @@ async function RunAsync({
       );
   const intent = views?.intents[report.requirement_version_id];
   const role = query['role'] ?? 'engineer';
+  const decisions = listReviewDecisions(root, project, report.run_id);
+  const technicalQuery = new URLSearchParams({ project, repo: repoDefault, view: 'technical' });
   const quizzes = listQuizzes(root).filter(
     (q) => q.revision === report.checked_revision && (project === '' || q.project_id === project),
   );
@@ -234,26 +245,106 @@ async function RunAsync({
   const responses = listResponses(root).filter((r) => quizIds.has(r.quiz_id));
   const testRuns = report.test_runs ?? [];
   const testRunById = new Map(testRuns.map((t) => [t.run.id, t]));
+  // Revision comparison: previous stored report for the same intent, if any.
+  // Labels compare verdict ranks only — a new revision alone proves nothing.
+  const RANK: Record<string, number> = {
+    contradicted: 0, not_established: 1, not_applicable: 1, partial: 2, supported: 3,
+  };
+  const prevRun = listRuns(root)
+    .filter((r) => r.intent === report.requirement_version_id && r.id !== report.run_id && r.created < report.created_at)
+    .sort((a, b) => (a.created < b.created ? 1 : -1))[0];
+  const prevReport = prevRun === undefined
+    ? null
+    : (readReportFile(root, prevRun.id) as { checked_revision: string; results: Result[] } | null);
+  const KIND_BADGE: Record<string, string> = {
+    improved: 'supported', regressed: 'contradicted', unchanged: '', new: 'medium',
+  };
+  const deltas = prevReport === null
+    ? []
+    : report.results.map((r) => {
+      const prev = prevReport.results.find((p) => p.criterion.id === r.criterion.id);
+      if (prev === undefined) return { criterion: r.criterion.text, kind: 'new', from: '—', to: r.finding.finding };
+      const d = (RANK[r.finding.finding] ?? 1) - (RANK[prev.finding.finding] ?? 1);
+      return {
+        criterion: r.criterion.text,
+        kind: d > 0 ? 'improved' : d < 0 ? 'regressed' : 'unchanged',
+        from: prev.finding.finding,
+        to: r.finding.finding,
+      };
+    });
   return (
-    <main>
-      <h1>
-        Run <code>{report.run_id.slice(0, 18)}…</code>
-      </h1>
+    <AppShell active="runs" context={query}>
+      <p className="breadcrumb"><a href={`/workspace?project=${encodeURIComponent(project)}`}>Project overview</a> / Acceptance brief</p>
+      <h1>{intent?.feature_id ?? 'Feature'}: acceptance brief</h1>
+      <p className="lede">What you asked for, what this version establishes, and the decision you want to make next.</p>
+      <p className="evidence">{report.provider === 'rules' ? 'Rules-based check · no model assessment' : `${report.provider} assessment · ${report.model}`} · Saved version <code>{report.checked_revision.slice(0, 7)}</code>. This report describes that version; later edits need a new check.</p>
+      <nav className="report-nav" aria-label="Report view"><a href={`/run/${encodeURIComponent(report.run_id)}?project=${encodeURIComponent(project)}`} aria-current={query['view'] !== 'technical' ? 'page' : undefined}>Product view</a><a href={`/run/${encodeURIComponent(report.run_id)}?${technicalQuery}#technical-evidence`} aria-current={query['view'] === 'technical' ? 'page' : undefined}>Technical view</a></nav>
+      <TraceAtlas before={atlasFromReport(report, repoDefault)} project={project} journey={false} />
+      <ProductBrief results={report.results} project={project} run={report.run_id} repo={repoDefault} revision={report.checked_revision} decisions={decisions} failedTests={testRuns.some((t) => t.run.exit_code !== 0 || t.run.failed > 0)} reviewError={query['review_error']} />
+      <details id="technical-evidence" className="technical-section" open={query['view'] === 'technical'}><summary>Technical evidence & tools</summary>
       <p className="muted">
-        revision <code>{report.checked_revision.slice(0, 7)}</code> — intent{' '}
-        <code>{report.requirement_version_id}</code> — {report.provider}/{report.model} — {report.created_at}
+        revision <code>{report.checked_revision.slice(0, 7)}</code> — {report.provider === 'rules' ? 'Rules-based' : report.provider}/{report.model} — {report.created_at}
+        {' '}— <a href={`/intent/${encodeURIComponent(report.requirement_version_id)}?project=${encodeURIComponent(project)}`}>approved brief</a>
         {project !== '' ? (
           <>
             {' '}— <a href={`/handover?project=${encodeURIComponent(project)}&intent=${encodeURIComponent(report.requirement_version_id)}&run=${encodeURIComponent(report.run_id)}`}>team handover</a>
           </>
         ) : null}
       </p>
-      <h2>Findings ({report.results.length})</h2>
+      <nav className="report-nav" aria-label="Report sections"><a href="#findings">Findings</a><a href="#tests">Test evidence</a><a href="#packs">Correction brief</a><a href="#recheck">Recheck</a><a href="#understand">Understand</a><a href="#changes">Changes</a></nav>
+      <ol className="steps">
+        <li className="done">1 · Connect repository</li>
+        <li className="done">2 · Describe what to build</li>
+        <li className="done">3 · Approve requirements</li>
+        <li className="now">4 · Verify implementation</li>
+        <li>5 · Fix and recheck</li>
+      </ol>
+      <h2>Evidence strand</h2>
+      <p className="lede">
+        Follow each thread from what was requested, through the evidence actually cited, to the verdict it earned.
+        A dashed thread ending in “no citation yet” is an honest gap, not a failure of the drawing. Select a criterion to open its rationale.
+      </p>
+      <EvidenceStrand
+        runId={report.run_id}
+        repo={repoDefault}
+        rows={report.results.map((r) => ({
+          criterionId: r.criterion.id,
+          text: r.criterion.text,
+          finding: r.finding.finding,
+          grade: r.finding.evidence_grade,
+          rationale: r.finding.rationale,
+          missing: r.finding.missing_proof,
+          stale: false,
+          evidence: r.evidence.map((e) => ({
+            id: e.id,
+            tier: e.tier,
+            ...(e.path !== undefined ? { path: e.path } : {}),
+            ...(e.line_start !== undefined ? { lineStart: e.line_start } : {}),
+            ...(e.line_end !== undefined ? { lineEnd: e.line_end } : {}),
+            description: e.description,
+            testBacked: e.test_run_id !== undefined,
+          })),
+        }))}
+      />
+      <h2 id="findings">Findings ({report.results.length})</h2>
+      <p className="lede">
+        {report.results.filter((r) => r.finding.finding === 'supported').length} of {report.results.length} criteria
+        established · {report.results.filter((r) => r.finding.finding === 'partial' || r.finding.finding === 'contradicted').length} need
+        attention · {report.results.filter((r) => r.finding.finding !== 'supported' && r.finding.finding !== 'partial' && r.finding.finding !== 'contradicted').length} unproven.
+        Open a finding to see the evidence behind it.
+      </p>
       {report.results.map((r) => (
-        <section key={r.criterion.id} className="section">
-          <h3>
-            <span className={`badge ${r.finding.finding}`}>{r.finding.finding}</span> {r.criterion.text}
-          </h3>
+        <details
+          key={r.criterion.id}
+          className="finding"
+          open={r.finding.finding !== 'supported'}
+        >
+          <summary>
+            <h3>
+              <span className={`badge ${r.finding.finding}`}>{r.finding.finding}</span> {r.criterion.text}
+            </h3>
+          </summary>
+          <div className="finding-body">
           <p className="muted">
             grade {r.finding.evidence_grade} — confidence {r.finding.confidence}
           </p>
@@ -282,9 +373,31 @@ async function RunAsync({
           {r.adjudicatorNotes.length > 0 && (
             <p className="evidence">Adjudicator: {r.adjudicatorNotes.join(' | ')}</p>
           )}
-        </section>
+          </div>
+        </details>
       ))}
-      <h2>Test runs ({testRuns.length})</h2>
+      <h2>Changes since the previous check</h2>
+      {prevRun === undefined || prevReport === null ? (
+        <div className="empty">This is the first recorded check for this intent — nothing to compare yet. After the next <a href="#recheck">recheck</a>, changes since this check will appear here.</div>
+      ) : (
+        <>
+          <p className="lede">
+            Revision <code>{prevReport.checked_revision.slice(0, 7)}</code> →{' '}
+            <code>{report.checked_revision.slice(0, 7)}</code>. Labels compare
+            verdicts only — a new revision alone proves nothing was fixed.
+          </p>
+          <ul className="queue">
+            {deltas.map((d) => (
+              <li key={d.criterion}>
+                <span className={`badge ${KIND_BADGE[d.kind] ?? ''}`}>{d.kind}</span>{' '}
+                {d.criterion}
+                <span className="evidence"> — {d.from} → {d.to}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <h2 id="tests">Test runs ({testRuns.length})</h2>
       {testRuns.length === 0 ? (
         <p className="muted">No test runs recorded for this verification — grades rest on source evidence alone (E1 at best).</p>
       ) : (
@@ -331,7 +444,19 @@ async function RunAsync({
           <p className="evidence">acceptance: {p.acceptance_commands.join(' && ')}</p>
         </section>
       ))}
-      <h2>Re-verify after a patch</h2>
+      <ol className="steps">
+        <li className="done">1 · Connect repository</li>
+        <li className="done">2 · Describe what to build</li>
+        <li className="done">3 · Approve requirements</li>
+        <li className="done">4 · Verify implementation</li>
+        <li className="now">5 · Fix and recheck</li>
+      </ol>
+      <div className="notice">
+        Before rechecking: commit your fix in the repository, note the new
+        revision hash, and optionally name an acceptance command with the paths
+        it exercises — passing runs upgrade source evidence to test-backed (E2).
+      </div>
+      <h2 id="recheck">Re-verify after a patch</h2>
       <form method="POST" action="/api/recheck">
         <input type="hidden" name="project" value={project} />
         <input type="hidden" name="intent" value={report.requirement_version_id} />
@@ -362,7 +487,7 @@ async function RunAsync({
       </form>
       <h2 id="understand">Understanding Studio</h2>
       {intent === undefined || intent === null ? (
-        <p className="muted">Explanation needs the intent in this project ledger.</p>
+        <p className="muted">Explanation needs the intent in this project ledger. <a href={`/workspace?project=${encodeURIComponent(project)}`}>Open the project overview</a> to choose the project this report belongs to.</p>
       ) : (
         <UnderstandBlock
           project={project}
@@ -376,9 +501,9 @@ async function RunAsync({
           responses={responses}
         />
       )}
-      <h2>Possibly unrequested changes ({report.orphans.length})</h2>
+      <h2 id="changes">Possibly unrequested changes ({report.orphans.length})</h2>
       {report.orphans.length === 0 ? (
-        <p className="muted">None flagged.</p>
+        <p className="muted">None flagged — no action needed. A future check run with a base revision will list any new drift here.</p>
       ) : (
         <table>
           <thead>
@@ -401,6 +526,7 @@ async function RunAsync({
           </tbody>
         </table>
       )}
-    </main>
+      </details>
+    </AppShell>
   );
 }

@@ -5,10 +5,12 @@
 // appends a raw capture record, and exits 0. All interpretation happens later
 // in `bb capture`; this hook never approves anything.
 import { appendFileSync, mkdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const LOG_DIR = process.env.BB_HOOK_LOG_DIR ?? join(tmpdir(), 'bb-hook-probe');
+const MAX_PROMPT_CHARS = 4000;
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -20,12 +22,29 @@ function readStdin() {
   });
 }
 
+function firstString(payload, keys) {
+  for (const k of keys) {
+    const v = payload[k];
+    if (typeof v === 'string' && v.length > 0) return v;
+  }
+  for (const nest of ['params', 'payload', 'hook', 'context']) {
+    const inner = payload[nest];
+    if (inner !== null && typeof inner === 'object' && !Array.isArray(inner)) {
+      for (const k of keys) {
+        const v = inner[k];
+        if (typeof v === 'string' && v.length > 0) return v;
+      }
+    }
+  }
+  return undefined;
+}
+
 function extractPrompt(payload) {
   if (typeof payload === 'string') {
     try {
       return extractPrompt(JSON.parse(payload));
     } catch {
-      return payload.slice(0, 4000);
+      return payload;
     }
   }
   if (payload === null || typeof payload !== 'object') return '';
@@ -36,15 +55,52 @@ function extractPrompt(payload) {
     payload.payload && payload.payload.prompt,
   ];
   for (const c of candidates) {
-    if (typeof c === 'string' && c.length > 0) return c.slice(0, 4000);
+    if (typeof c === 'string' && c.length > 0) return c;
   }
-  return JSON.stringify(payload).slice(0, 4000);
+  return JSON.stringify(payload);
+}
+
+function sha256Hex(text) {
+  return createHash('sha256').update(text, 'utf8').digest('hex');
 }
 
 const raw = await readStdin();
-mkdirSync(LOG_DIR, { recursive: true });
-appendFileSync(
-  join(LOG_DIR, 'captured.jsonl'),
-  JSON.stringify({ at: new Date().toISOString(), prompt: extractPrompt(raw), rawBytes: raw.length }) + '\n',
-);
+let parsed = null;
+try {
+  parsed = raw.trim().length > 0 ? JSON.parse(raw) : null;
+} catch {
+  parsed = null;
+}
+const full = parsed === null && raw.trim().length > 0 && raw.trim().startsWith('{')
+  ? raw
+  : extractPrompt(parsed === null ? raw : parsed);
+const record = {
+  at: new Date().toISOString(),
+  source: 'hook',
+  event: (parsed !== null && typeof parsed === 'object'
+    ? firstString(parsed, ['hook_event_name', 'hookEventName', 'event_name', 'eventName', 'event'])
+    : undefined) ?? 'unknown',
+  prompt: full.slice(0, MAX_PROMPT_CHARS),
+  promptLength: full.length,
+  truncated: full.length > MAX_PROMPT_CHARS,
+  promptHash: sha256Hex(full),
+  rawBytes: raw.length,
+};
+if (parsed !== null && typeof parsed === 'object') {
+  const sessionId = firstString(parsed, ['session_id', 'sessionId', 'sessionID']);
+  if (sessionId !== undefined) record.sessionId = sessionId;
+  const projectRoot = firstString(parsed, ['cwd', 'projectRoot', 'project_root', 'workspace', 'workspaceRoot', 'project']);
+  if (projectRoot !== undefined) record.projectRoot = projectRoot;
+  const agent = firstString(parsed, ['agent', 'agent_name', 'source_agent']);
+  if (agent !== undefined) record.agent = agent;
+}
+try {
+  mkdirSync(LOG_DIR, { recursive: true });
+  appendFileSync(
+    join(LOG_DIR, 'captured.jsonl'),
+    `${JSON.stringify(record)}\n`,
+  );
+} catch {
+  // Observable probe log only: never fail the user's prompt when unwritable.
+}
 process.exit(0);

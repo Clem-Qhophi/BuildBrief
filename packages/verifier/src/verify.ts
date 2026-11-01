@@ -75,9 +75,10 @@ export interface VerificationReport {
 const MAX_EVIDENCE_PER_CRITERION = 4;
 const EXCERPT_CHARS = 1500;
 
-function dirOf(path: string): string {
-  const i = path.lastIndexOf('/');
-  return i <= 0 ? '' : path.slice(0, i);
+function coversPath(covered: string, path: string): boolean {
+  const declared = covered.replaceAll('\\', '/').replace(/^\.\//, '');
+  const candidate = path.replaceAll('\\', '/').replace(/^\.\//, '');
+  return declared.endsWith('/') ? candidate.startsWith(declared) : candidate === declared;
 }
 
 function testGradeUpgrade(
@@ -90,7 +91,8 @@ function testGradeUpgrade(
     (r) =>
       r.run.revision === revision &&
       r.run.exit_code === 0 &&
-      r.covers.some((c) => ev.path === c || dirOf(ev.path as string) === dirOf(c)),
+      r.run.failed === 0 &&
+      r.covers.some((c) => coversPath(c, ev.path as string)),
   );
   if (hit === undefined) return ev;
   return { ...ev, tier: 'E2_test', test_run_id: hit.run.id };
@@ -225,6 +227,18 @@ export async function verify(opts: VerifyOptions): Promise<VerificationReport> {
       exhaustiveNegative:
         criterion.negative === true && trace.exhaustive && attached.length === 0 && droppedEvidenceIds.length === 0,
     });
+    // File-level acceptance failures cannot identify a particular failing
+    // assertion, but they must prevent an unqualified supported verdict for
+    // evidence in that file. Preserve source citations and explain uncertainty;
+    // do not invent a criterion-specific contradiction from a failed suite.
+    const failingRuns = runs.filter((r) => r.run.revision === revision &&
+      (r.run.exit_code !== 0 || r.run.failed > 0) &&
+      attached.some((e) => e.path !== undefined && r.covers.some((c) => coversPath(c, e.path as string))));
+    const acceptanceBlocked = finding === 'supported' && failingRuns.length > 0;
+    const acceptanceNote = acceptanceBlocked
+      ? `Recorded acceptance command failed for a cited path (${failingRuns.map((r) => r.run.command.join(' ')).join('; ')}); source support is insufficient until the failure is resolved. File-level coverage does not identify the failing criterion.`
+      : '';
+    if (acceptanceBlocked) reasons.push(acceptanceNote);
     const suffix = droppedEvidenceIds.length > 0
       ? ` [model cited unknown evidence ids, ignored: ${droppedEvidenceIds.join(', ')}]`
       : '';
@@ -234,13 +248,13 @@ export async function verify(opts: VerifyOptions): Promise<VerificationReport> {
       requirement_version_id: opts.intent.id,
       criterion_id: criterion.id,
       checked_revision: revision,
-      finding,
+      finding: acceptanceBlocked ? 'not_established' : finding,
       evidence_ids: attached.map((e) => e.id),
       evidence_grade: grade,
       coverage: proposed.coverage,
-      confidence: proposed.confidence,
-      rationale: proposed.rationale + suffix,
-      missing_proof: proposed.missing_proof,
+      confidence: acceptanceBlocked ? Math.min(proposed.confidence, 0.3) : proposed.confidence,
+      rationale: proposed.rationale + suffix + (acceptanceBlocked ? ` ${acceptanceNote}` : ''),
+      missing_proof: acceptanceBlocked ? [...proposed.missing_proof, 'Resolve the recorded acceptance failure and verify again.'] : proposed.missing_proof,
       provider: opts.provider.name,
       model: opts.provider.model,
       prompt_version: out.usage.prompt_version,
