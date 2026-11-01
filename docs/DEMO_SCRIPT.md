@@ -85,6 +85,24 @@ Say: "The dashboard reads the same ledger — no separate backend to drift. The
 benchmark is seeded and small; we report it as a controlled check, never as
 real-world accuracy. Two known gaps are documented, not hidden."
 
+## 9:00–9:30 — New surfaces on the same ledger (all live)
+
+```powershell
+node $BB init   # inspect-only: agent versions, hooks template, MCP serve command; changes nothing
+npm run test:ab
+# expect: 3 AB-OK (agree=true on all 3; 0 tokens; turns unmeasured — needs a live agent)
+```
+
+Then in the workbench (`BB_WORKSPACE` still set): open `/quiz` (Test yourself:
+by feature, by category, general mixed — all grounded in stored reports),
+`/activity` (session timeline with labelled gaps), `/readiness` (per-feature
+draft/never-run/stale/attention/established + known limitations + ledger
+export). Landing hero: "Build what you intended. Not just what AI understood."
+
+Say: "Every new screen reads the same ledger and says what it cannot prove.
+The A/B table ties on verdicts by design — same engine — and wins on
+structure: questions asked, checks compiled, packs scoped."
+
 ## 9:00–10:00 — Close
 
 "What you saw is real: every verdict cited its revision and line spans. What is

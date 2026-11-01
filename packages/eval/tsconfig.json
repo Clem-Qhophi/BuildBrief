@@ -9,6 +9,7 @@
   "references": [
     { "path": "../domain" },
     { "path": "../model-meta" },
+    { "path": "../planning" },
     { "path": "../repo" },
     { "path": "../store" },
     { "path": "../verifier" }

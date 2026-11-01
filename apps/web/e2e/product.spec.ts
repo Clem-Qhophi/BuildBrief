@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('public navigation leads to a real example and revision-bound reports', async ({ page }) => {
   test.setTimeout(120_000);
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Keep your idea in the picture.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Build what you intended. Not just what AI understood.' })).toBeVisible();
   await expect(page.locator('.connected-home')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'You shouldn’t have to read every line to own the product.' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Workspace' })).toHaveCount(0);

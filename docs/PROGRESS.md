@@ -1,5 +1,144 @@
 # Progress
 
+## 2026-11-01 Final validation before owner commit
+
+- :3103 rebuilt + restarted on the full tree: `/`, `/quiz`, `/activity`,
+  `/readiness`, `/settings`, `/workspace`, `/features` all 200.
+- Full battery: tsc 0, npm test 0 (98+14 pass), eval 22/22+6/6+2 gaps.
+- Browser screenshots of `/activity` (honest empty state) and
+  `/readiness` (5 real draft intents, plain statuses, limitations,
+  export links), 0 console errors on all new pages.
+- Everything not owner-blocked is built. Open: BB-020 interactive
+  probes, BB-021 live call, BB-051 second adapter, BB-080 dead-code
+  call, BB-090 rehearsal/freeze/submit.
+
+## 2026-11-01 BB-090 close-out docs + BB-020 versions
+
+- Agent versions verified read-only on this machine: muse 1.4.14,
+  codex-cli 0.164.0, claude 2.1.198 (ADR-022). `bb init` actually missed
+  all three on Windows (Node cannot exec `.cmd` shims without a shell) —
+  fixed via `cmd.exe /c` + `probeCandidates` + unit test; live `bb init`
+  now reports all three. Firing/payloads/elicitation still UNVERIFIED
+  (need interactive sessions). No Meta key in this environment; no live
+  calls made ($0.00 spent).
+- SUBMISSION.md refreshed (98+14 tests, new surfaces, 5 research PDFs);
+  DEMO_SCRIPT.md gained the new-surfaces section with real expected
+  outputs; `docs/BUILD_REPORT.md` written (the missing close-out file:
+  reconciliation, per-task account, verification record, budget,
+  limitations, backlog, decisions, commit file list).
+- Gates: npm test 0 (98+14 pass). Docs-only otherwise.
+
+## 2026-11-01 BB-072 A/B harness
+
+- `packages/eval/src/ab.ts` (`npm run test:ab`): 3 tasks (invoice happy,
+  auth-bypass contradiction, partial credit) each run as baseline
+  (approve+verify) vs assisted (questions + compiled checks + verify +
+  packs). Result: verdicts agree on all 3 (same engine, stated);
+  expectations met; assisted adds 3 questions, 1-2 deterministic checks,
+  0-2 scoped packs per task; 0 model tokens (rules offline, stated);
+  turns-to-acceptance unmeasured (needs a live agent, stated in every
+  row). Two first-run mismatches were harness authoring errors, fixed
+  honestly: baseRevision was missing (no orphans without a base), and
+  the auth hunk maps to its criterion rather than orphaning (matches the
+  proven contradiction fixture). Gates: test:ab 0, npm test 0 (97+14),
+  eval 22/22+6/6+2 gaps.
+
+## 2026-11-01 BB-071 release readiness
+
+- `readinessSummary` in `web/lib/assurance.ts` (+ status test): draft,
+  never-run, stale, attention, established per feature from stored runs;
+  open-gate count. `/readiness` page renders rows with plain status words,
+  report/brief links, a Known limitations list (no browser/staging/
+  production checks; unverified hooks; revision-bound reports), and the
+  existing ledger export. Nav entry, responsive route, HTTP assertions.
+- Gates: tsc 0, npm test 0 (95+14 pass), eval 22/22+6/6+2 gaps, web:build
+  0 with /readiness, disposable-server HTTP 33 pass / 1 skip.
+  Playwright re-running.
+
+## 2026-11-01 BB-060 Project Room
+
+- `apps/web/lib/assurance.ts` (`summarizeReport`, `attentionSummary`) +
+  3 tests: counts only, no rates or scores. Workspace gains an attention
+  queue (pending orphans, stale checks, open gates — each linked), a
+  founder summary card, and a Founder/Developer density toggle
+  (`?mode=`, developer default so all existing selectors hold; founder
+  hides revision hashes, provider strings and evidence grades).
+- Run reports gain a "Coverage of this check" block: verdict counts in
+  plain words, evidence/file counts, test runs with exits, stale items,
+  search gaps, provider and timestamp — all from the stored report.
+- Gates: tsc 0, npm test 0 (95+14 pass), eval 22/22+6/6+2 gaps, web:build
+  0, disposable-server HTTP 32 pass / 1 skip (new assertions for the
+  queue, toggle and coverage block). Playwright re-running.
+
+## 2026-11-01 BB-052 activity + bb init
+
+- `bb init` (`cli/src/commands.ts`, `main.ts` help + switch,
+  `cli/test/init.test.ts`): inspect-only wiring report — binary probes
+  (muse/codex/claude), `.muse/hooks.json` template status, MCP serve
+  command with per-agent registration left explicit, UNVERIFIED firing
+  stated. Writes nothing, idempotent. A failing test caught a real gap
+  (template status hidden when no agent installed) and the report now
+  always states it.
+- Activity: `apps/web/lib/activity.ts` (`buildTimeline` with gap rows for
+  silent sessions and unobserved ends) + 3 tests, `/activity` page with
+  empty states, AppShell nav entry, responsive route, HTTP assertions.
+  Gates: tsc 0, npm test 0 (95+14 pass), eval 22/22+6/6+2 gaps, web:build
+  0 with /activity, web unit 22 pass, disposable-server HTTP 29 pass /
+  1 skip. Playwright re-running.
+
+## 2026-11-01 BB-050 adapter #1 + controlled gate
+
+- `packages/muse/lib/gate.js` (pure): clean→open, hard evidence→block
+  (loop+1) or advisory warn with autopsy prompt, model-only→advisory,
+  loops>=3→escalate_human, reasoned override→open. `lib/normalize.js`:
+  muse/codex/claude lifecycle mapping with supported:false gaps.
+  `handlers/bb-hook.js`: stdin JSON→decision JSON, always exit 0,
+  advisory default (blocking unverified on this Muse build — stated in
+  HANDLERS.md). 7 tests in `muse/test/gate.test.js` (lib + CLI incl.
+  never-crashes). Gates: npm test 0 (93+14 pass), eval 22/22+6/6+2 gaps.
+  Live firing still UNVERIFIED — needs the owner interactive run (BB-020).
+
+## 2026-11-01 BB-040 acceptance compiler
+
+- `packages/planning/src/compile.ts`: approved intents only (drafts
+  refused); per-criterion mapping negative→path (constraint paths, never
+  a command), command→test (covers noted in expect), detected→build/lint,
+  otherwise labelled model checks. Stable `stableId` ids make two runs at
+  one revision byte-identical. 5 tests in `planning/test/compile.test.ts`
+  incl. seeded-referral shape (test+path+build present), reproducibility,
+  and draft refusal. Gates: tsc 0, npm test 0 (93+7 pass), eval
+  22/22+6/6+2 gaps. `http` checks stay stretch per the cut line.
+
+## 2026-11-01 BB-030 intake engine
+
+- New `packages/planning` (pure, zero runtime deps beyond domain):
+  `planQuestions` ranks candidates with BB-010 scores, skips anything the
+  repo facts already answer (stack/framework/tests/manifests) with a
+  reason, caps the first pass at 6, lets critical unresolved decisions
+  exceed the budget with a stated reason, and offers decide-for-me only
+  when reversibility_cost <= 2. Wired into `tsconfig.json` references,
+  root `test` script and `npm install` (lockfile +11 lines).
+  Tests: `planning/test/plan.test.ts`, 10 scenarios (invoice, landing,
+  referral, CSV, rate-limit greenfields; stack/tests/owner-knowledge/
+  critical/overflow existing-repo). Gates: tsc 0, npm test 0 (88+7 pass),
+  eval 22/22+6/6+2 gaps. Contract-card UI and MCP tiers stay in BB-060 /
+  BB-050; this phase ships the engine they will share.
+
+## 2026-11-01 BB-010 domain contracts + BB-062 hero lock
+
+- BB-010 done: `packages/domain/src/questions.ts` (ClarificationQuestion,
+  DecisionRecord, rank by impact x ambiguity x answerability / reversibility),
+  `checks.ts` (AcceptanceCheck, deterministic labelling), `capabilities.ts`
+  (CapabilityManifest, AgentSession/Event with captured_via, GateRecord with
+  MAX_GATE_LOOPS=3 + override rules). 7 new ledger event types appended;
+  `ProjectViews` extended with questions/decisions/checks/sessions/
+  sessionEvents/gates (legacy ledgers rebuild identically, new maps empty).
+  Tests: `domain/test/contracts.test.ts` + `store/test/contracts.test.ts`
+  (8 tests). Gates: tsc 0, npm test 0 (78+7 pass), eval 22/22+6/6+2 gaps.
+- BB-062 done: owner picked hero B. Live H1 "Build what you intended. Not
+  just what AI understood." + approved subheading; `?hero=` variants
+  removed; title + http/e2e assertions updated; :3103 verified + screenshot.
+
 ## 2026-10-27 (Tue) — Day 1
 
 ### Done

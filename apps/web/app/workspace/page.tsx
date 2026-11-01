@@ -1,6 +1,7 @@
 import AppShell from '../components/AppShell';
 import { projectHref, projectParams } from '../../lib/context';
 import { getViews, listProjects, listRuns, workspaceRoot } from '../../lib/ledger';
+import { attentionSummary } from '../../lib/assurance';
 import { projectName } from '../../lib/presentation';
 
 export const dynamic = 'force-dynamic';
@@ -98,6 +99,16 @@ async function HomeAsync({ searchParams }: { searchParams: Promise<Record<string
       ? 'Rules-based and Meta model checks'
       : 'Meta model checks'
     : 'Rules-based checks · no model assessment';
+  const mode = params['mode'] === 'developer' ? 'developer' : 'founder';
+  const modeQs = (m: string): string => `${qp}${qp === '' ? '?' : '&'}mode=${m}`;
+  const attention = attentionSummary({
+    orphans: Object.values(views.orphans),
+    findings: Object.values(views.findings).map((f) => ({ id: f.id, run_id: f.run_id, stale: f.stale })),
+    latestRunIds: [...latestRunIds].filter((id): id is string => typeof id === 'string'),
+    gates: Object.values(views.gates ?? {}),
+  });
+  const nEstablished = flow.filter((f) => f.stage === 'established').length;
+  const nAttentionFlow = flow.filter((f) => f.stage === 'attention').length;
   const nSupported = checked.filter((f) => f.finding === 'supported').length;
   const nAttention = checked.filter((f) => f.finding === 'partial' || f.finding === 'contradicted').length;
   const nContradicted = checked.filter((f) => f.finding === 'contradicted').length;
@@ -112,6 +123,17 @@ async function HomeAsync({ searchParams }: { searchParams: Promise<Record<string
           {intents.length} intention{intents.length === 1 ? '' : 's'} · {runs.length} verification run{runs.length === 1 ? '' : 's'} ·{' '}
           <a href={projectHref('/new', params)}>New intent</a>
         </p>
+        <nav className="report-nav" aria-label="Detail level"><a href={modeQs('founder')} aria-current={mode === 'founder' ? 'page' : undefined}>Founder view</a><a href={modeQs('developer')} aria-current={mode === 'developer' ? 'page' : undefined}>Developer view</a></nav>
+        {mode === 'founder' && (
+          <div className="card founder-summary">
+            <p className="stat-label">Where things stand</p>
+            <p>{nEstablished} of {intents.length} feature{intents.length === 1 ? '' : 's'} established{nAttentionFlow > 0 ? `, ${nAttentionFlow} need${nAttentionFlow === 1 ? 's' : ''} your attention` : ''}.</p>
+            {attention.pendingOrphans.length > 0 && <p>{attention.pendingOrphans.length} changed file{attention.pendingOrphans.length === 1 ? '' : 's'} waiting for your review.</p>}
+            {attention.staleFindings.length > 0 && <p>{attention.staleFindings.length} check{attention.staleFindings.length === 1 ? ' is' : 's are'} stale — re-verify to refresh.</p>}
+            {attention.openGates.length > 0 && <p>{attention.openGates.length} repair gate{attention.openGates.length === 1 ? ' is' : 's are'} open.</p>}
+            <p className="next-link"><a href={nextHref}>{nextLabel}</a></p>
+          </div>
+        )}
         {checked.length === 0 ? (
           <p className="muted">Nothing checked yet — no verdict bar to draw. Approve an intent and verify it to start the thread of proof.</p>
         ) : (
@@ -154,6 +176,23 @@ async function HomeAsync({ searchParams }: { searchParams: Promise<Record<string
         <p className="next-link"><a href={nextHref}>{nextLabel}</a></p>
       </div>
 
+      <h2>Attention queue</h2>
+      {attention.pendingOrphans.length === 0 && attention.staleFindings.length === 0 && attention.openGates.length === 0 ? (
+        <div className="empty">Nothing waiting — no unreviewed changes, stale checks, or open repair gates.</div>
+      ) : (
+        <ul className="queue">
+          {attention.pendingOrphans.map((o) => (
+            <li key={o.id}>Changed file waiting for review: <a href={`/changes${qp}`}>{o.path}</a></li>
+          ))}
+          {attention.staleFindings.length > 0 && (
+            <li>{attention.staleFindings.length} stale check{attention.staleFindings.length === 1 ? '' : 's'} — re-verify to refresh the evidence.</li>
+          )}
+          {attention.openGates.map((g) => (
+            <li key={g.session_id}>Open repair gate after {g.loops} loop{g.loops === 1 ? '' : 's'} — <a href={`/activity${qp}`}>review the session</a>.</li>
+          ))}
+        </ul>
+      )}
+
       <h2>Your feature briefs</h2>
       {flow.length === 0 ? (
         <div className="empty">Nothing captured yet. Describe what your coding agent is supposed to build.</div>
@@ -193,7 +232,7 @@ async function HomeAsync({ searchParams }: { searchParams: Promise<Record<string
             <li key={finding.id}>
               <span className={`badge ${finding.finding}`}>{finding.finding}</span>{' '}
               <a href={`/run/${encodeURIComponent(finding.run_id)}${qp}`}>{text}</a>
-              <span className="evidence"> — {feature} · grade {finding.evidence_grade}</span>
+              {mode === 'developer' && <span className="evidence"> — {feature} · grade {finding.evidence_grade}</span>}
             </li>
           ))}
         </ul>
@@ -207,9 +246,9 @@ async function HomeAsync({ searchParams }: { searchParams: Promise<Record<string
           {runs.slice(0, 5).map((r) => (
             <li key={r.id}>
               <a href={`/run/${encodeURIComponent(r.id)}${r.project !== '' ? `?project=${encodeURIComponent(r.project)}` : ''}`}>
-                <code>{r.revision.slice(0, 7)}</code> — {r.summary}
+                {mode === 'developer' ? <code>{r.revision.slice(0, 7)}</code> : 'Checked version'} — {r.summary}
               </a>
-              <span className="evidence"> · {r.provider} · {r.created}</span>
+              {mode === 'developer' && <span className="evidence"> · {r.provider} · {r.created}</span>}
             </li>
           ))}
         </ol>

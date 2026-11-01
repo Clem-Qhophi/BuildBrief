@@ -24,8 +24,23 @@ and spans — uncertainty defaults to `not_established`, never to green.
 - `muse-spark-1.3` (Standard mode) proposes verdicts over allowlisted evidence
   excerpts via structured JSON output; a mechanical adjudicator re-validates
   every citation before any verdict stands. See `docs/MODEL_DISCLOSURE.md`.
+  Rules-first by default; Meta runs only when explicitly selected with a key.
 - Native Muse Code integration: project skill, stdio MCP server (`bb_*`
-  tools), hook handlers for prompt capture and constraint guarding.
+  tools), hook handlers for prompt capture and constraint guarding, plus
+  `handlers/bb-hook.js` (normalize + controlled gate, advisory by default)
+  and `bb init` (inspect-only wiring report for muse/codex/claude).
+
+## Original work
+
+Ledger schema and hash-chained event log, citation resolver, adjudicator with
+tier gating (source ≠ test ≠ staging ≠ production), reverse-check with
+human-disposed orphans, correction packs, quiz generation with mechanical
+locate grading and auto-retire, role tours, Quiz Studio (`/quiz`), Agent
+Activity (`/activity`, `bb init`), Release Readiness (`/readiness`),
+adaptive intake engine + acceptance compiler (`packages/planning`), A/B
+harness (`npm run test:ab`), workbench UI, and a 22-case seeded benchmark
+with measured precision/recall. Full tree is new code except the research
+PDFs under `docs/research/` (2 comparative + 3 strategy/audit sources).
 
 ## Original work
 
@@ -40,8 +55,9 @@ the two research PDFs under `docs/research/`.
 
 ```sh
 npm install && npm run build
-npm test            # 68 unit tests
+npm test            # 98 unit + 14 hook-handler checks
 npm run test:eval   # 22 dev + 6 holdout + 2 documented gaps (JS/TS + Python)
+npm run test:ab     # 3 assisted-vs-baseline tasks, honest table (turns unmeasured)
 ```
 
 Live loop: [`samples/referral-demo/DEMO.md`](../samples/referral-demo/DEMO.md).

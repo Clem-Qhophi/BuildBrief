@@ -58,3 +58,25 @@ MCP harness run is NOT proof of a live Muse lifecycle event.
   is `bb capture --source hook --session <id> --prompt-file <prompt>`, which
   yields completeness `hook_exact` and state `draft`. See
   `docs/MUSE_CAPTURE_VALIDATION.md` for the isolated demo and verdict.
+
+## 2026-11-01 bb-hook turn CLI + controlled gate (BB-050)
+
+- `handlers/bb-hook.js`: reads one JSON doc from stdin
+  `{ provider, event|payload, session_id?, project_id?, gate?, enforcement? }`,
+  prints one JSON decision line, always exits 0. Decisions: `allow`
+  (clean), `warn` (advisory findings, cap reached, or unproven transport),
+  `block` (only with `enforcement: 'blocking'` plus deterministic
+  failures or protected-path violations). Default enforcement is
+  `advisory` because blocking semantics are unverified on the installed
+  Muse build (see table above) — the CLI degrades honestly and says so.
+- `lib/normalize.js`: maps muse/codex/claude hook payloads to
+  prompt_submitted, tool_proposed/completed, turn_ended, session
+  started/ended. Anything unmapped returns `{ supported: false }` with a
+  reason; gaps are never claimed as captured.
+- `lib/gate.js`: pure gate — clean turns open; hard evidence blocks
+  (loop counter +1) or warns with an autopsy fix prompt (goal, failing
+  checks, evidence, prior attempts, constraints, new-revision acceptance);
+  model-only uncertainty is advisory; loops >= 3 escalate to the human;
+  a reasoned human override opens the gate and is recorded.
+- Live firing of bb-hook decisions is UNVERIFIED until the owner runs it
+  against an interactive session (same standing caveat as capture/guard).

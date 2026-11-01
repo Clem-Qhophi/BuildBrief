@@ -1,4 +1,5 @@
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import {
   approveIntent,
@@ -517,5 +518,75 @@ export function cmdAutopsy(cwd: string, args: ParsedArgs): number {
     console.log('\nScoped next prompt:\n' + rep.next_prompt.text);
   }
   if (!any && onlyCriterion === '') console.log('no criterion has two failed attempts yet');
+  return 0;
+}
+
+/** Binary probe: returns the first --version line, or null when not runnable. */
+export type AgentProbe = (bin: string) => string | null;
+
+export function realAgentProbe(bin: string): string | null {
+  for (const candidate of probeCandidates(bin)) {
+    try {
+      // Windows .cmd shims need a shell; everything else execs directly.
+      const target = process.platform === 'win32' && candidate.endsWith('.cmd')
+        ? { file: 'cmd.exe', args: ['/c', candidate, '--version'] }
+        : { file: candidate, args: ['--version'] };
+      const out = execFileSync(target.file, target.args, { encoding: 'utf8', timeout: 8000 });
+      const first = String(out).split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0)[0];
+      if (first !== undefined) return first;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+/** Binary names to try in order. Windows resolves `.cmd` shims only by explicit name. */
+export function probeCandidates(bin: string): string[] {
+  if (process.platform === 'win32') return [bin, `${bin}.cmd`, `${bin}.exe`];
+  return [bin];
+}
+
+export interface InitAgentStatus {
+  agent: string;
+  bin: string;
+  version: string | null;
+  hooksTemplate: boolean;
+  verifiedFiring: boolean;
+}
+
+/**
+ * Inspect-only agent wiring report. Writes nothing and runs no agent
+ * workload: it detects binaries, checks the hooks template, and prints
+ * exactly what is wired versus what still needs the owner. Safe to re-run.
+ */
+export function buildInitReport(cwd: string, probe: AgentProbe): string[] {
+  const lines: string[] = ['BuildBrief agent wiring (inspect-only; nothing was changed):'];
+  const hooksCandidates = [join(cwd, '.muse', 'hooks.json')];
+  let hooksTemplate = false;
+  try {
+    hooksTemplate = hooksCandidates.some((p) => existsSync(p));
+  } catch {
+    hooksTemplate = false;
+  }
+  lines.push(`hooks template (.muse/hooks.json): ${hooksTemplate ? 'present (UNVERIFIED firing)' : 'absent'}`);
+  const agents: InitAgentStatus[] = [
+    { agent: 'muse', bin: 'muse', version: probe('muse'), hooksTemplate, verifiedFiring: false },
+    { agent: 'codex', bin: 'codex', version: probe('codex'), hooksTemplate: false, verifiedFiring: false },
+    { agent: 'claude', bin: 'claude', version: probe('claude'), hooksTemplate: false, verifiedFiring: false },
+  ];
+  for (const a of agents) {
+    lines.push(`- ${a.agent}: ${a.version ?? 'not found on PATH'}`);
+    if (a.version !== null) {
+      lines.push(`  live firing: UNVERIFIED until an interactive session demonstrably fires`);
+      lines.push(`  mcp: serve with "node ${join(cwd, 'packages', 'mcp', 'dist', 'src', 'serve.js')}" and register that command in the agent (exact steps differ per agent; verify on your machine)`);
+    }
+  }
+  lines.push('next: install one agent, run its throwaway logging hook, then record the real matrix (BB-020).');
+  return lines;
+}
+
+export function cmdInit(cwd: string, _args: ParsedArgs): number {
+  for (const line of buildInitReport(cwd, realAgentProbe)) console.log(line);
   return 0;
 }

@@ -8,6 +8,7 @@ import {
   cmdExplain,
   cmdFix,
   cmdGrade,
+  cmdInit,
   cmdList,
   cmdMap,
   cmdQuiz,
@@ -35,6 +36,7 @@ const HELP = `bb — Build Brief CLI (intent → evidence → verdict)
   bb tour --project P --intent ID --run RUN_ID --role engineer|marketing|...
   bb map --project P --intent ID [--repo DIR]
   bb autopsy --project P --intent ID [--criterion CID]
+  bb init (inspect-only agent wiring report; changes nothing)
 
 Ledger lives in ./.buildbrief (cwd). Reports in ./.buildbrief/reports.
 Docs: docs/ARCHITECTURE.md · Decisions: docs/DECISIONS.md
@@ -74,6 +76,8 @@ export async function main(argv: string[], cwd: string): Promise<number> {
         return cmdMap(cwd, args);
       case 'autopsy':
         return cmdAutopsy(cwd, args);
+      case 'init':
+        return cmdInit(cwd, args);
       case 'help':
       case '--help':
       case '-h':

@@ -2,6 +2,18 @@
 
 Living log. Newest first. Status: proposed | accepted | superseded.
 
+## ADR-022 (accepted 2026-11-01): Agent versions verified on the owner machine
+
+- Probbed 2026-11-01 with `--version` (read-only, no workload):
+  Muse Code 1.4.14 (matches the repo-recorded 1.4.14), codex-cli 0.164.0,
+  Claude Code 2.1.198. `bb init` reports all three live (it previously
+  missed Windows `.cmd` shims because Node cannot exec them without a
+  shell — fixed by probing through `cmd.exe /c`, with a unit test).
+- Still UNVERIFIED for every agent: hook firing, event payload shapes,
+  elicitation rendering, and block semantics. Those need interactive
+  sessions (BB-020 remainder). No capability matrix row may cite this ADR
+  as firing evidence.
+
 ## ADR-021 (accepted 2026-10-31): Retire the unwired scroll-story code
 
 - The Oct 30 TraceAtlas evidence network is canonical per owner (ADR-020).

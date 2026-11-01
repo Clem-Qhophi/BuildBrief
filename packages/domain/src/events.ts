@@ -19,6 +19,13 @@ export const EVENT_TYPES = [
   'quiz.answer_submitted',
   'role.tour_generated',
   'review.decision_recorded',
+  'question.asked',
+  'decision.recorded',
+  'check.recorded',
+  'check.completed',
+  'agent.session_started',
+  'agent.event_recorded',
+  'gate.decided',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

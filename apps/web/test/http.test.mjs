@@ -14,8 +14,8 @@ function decodeLink(value) { return value.replaceAll('&amp;', '&'); }
 
 test('HTTP: the landing page keeps the idea in the picture and links the evidence map', { skip: !base }, async () => {
   const page = await (await fetch(url('/'))).text();
-  assert.match(page, /Keep your idea[\s\S]*?in the picture/);
-  assert.match(page, /Build what/);
+  assert.match(page, /Build what you intended/);
+  assert.match(page, /Not just what AI understood/);
   assert.match(page, /More than a check/);
   assert.match(page, /id="product-map"/);
   for (const path of ['/start', '/demo?scenario=reset', '/connect?project=&amp;method=github']) assert.ok(page.includes(`href="${path}"`));
@@ -149,6 +149,19 @@ test('HTTP: quiz studio renders grounded sections for a checked project', { skip
   assert.match(studio, /General mixed/);
   assert.match(studio, /referral/);
   assert.match(studio, /Generate &amp; take the quiz/);
+  const room = await (await fetch(url(`/workspace?project=${encodeURIComponent(project)}`))).text();
+  assert.match(room, /Attention queue/);
+  assert.match(room, /Detail level/);
+  assert.match(room, /Where things stand/);
+  assert.match(before, /Coverage of this check/);
+  assert.match(before, /requirements established/);
+  const readiness = await (await fetch(url(`/readiness?project=${encodeURIComponent(project)}`))).text();
+  assert.match(readiness, /Release readiness/);
+  assert.match(readiness, /Known limitations/);
+  const activity = await (await fetch(url(`/activity?project=${encodeURIComponent(project)}`))).text();
+  assert.match(activity, /Agent activity/);
+  assert.match(activity, /No agent sessions recorded/);
+  assert.match(activity, /bb init/);
 });
   const unknown = await post('/api/verify', { project, intent: 'bb_intent_nope', repo: afterUrl.searchParams.get('repo') });
   assert.equal(unknown.status, 404);

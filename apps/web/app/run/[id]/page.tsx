@@ -2,6 +2,7 @@ import AppShell from '../../components/AppShell';
 import ProductBrief from '../../components/ProductBrief';
 import TraceAtlas from '../../components/TraceAtlas';
 import { atlasFromReport } from '../../../lib/atlas';
+import { summarizeReport } from '../../../lib/assurance';
 import { projectParams } from '../../../lib/context';
 import type { CorrectionPack, IntentVersion } from '@buildbrief/domain';
 import type { VerificationReport } from '@buildbrief/verifier';
@@ -278,6 +279,22 @@ async function RunAsync({
       <h1>{intent?.feature_id ?? 'Feature'}: acceptance brief</h1>
       <p className="lede">What you asked for, what this version establishes, and the decision you want to make next.</p>
       <p className="evidence">{report.provider === 'rules' ? 'Rules-based check · no model assessment' : `${report.provider} assessment · ${report.model}`} · Saved version <code>{report.checked_revision.slice(0, 7)}</code>. This report describes that version; later edits need a new check.</p>
+      <details className="coverage-block">
+        <summary>Coverage of this check</summary>
+        {(() => {
+          const coverage = summarizeReport(report as unknown as VerificationReport);
+          return (
+            <ul>
+              <li>{coverage.supported} of {coverage.criteria} requirements established{coverage.partial > 0 ? `, ${coverage.partial} partly covered` : ''}{coverage.contradicted > 0 ? `, ${coverage.contradicted} contradicted` : ''}{coverage.unproven > 0 ? `, ${coverage.unproven} unproven` : ''}.</li>
+              <li>{coverage.evidence} evidence references across {coverage.files.length} cited file{coverage.files.length === 1 ? '' : 's'}{coverage.files.length > 0 ? `: ${coverage.files.slice(0, 8).join(', ')}${coverage.files.length > 8 ? ', …' : ''}` : ''}.</li>
+              <li>{coverage.testRuns.length === 0 ? 'No acceptance command was recorded — grades rest on source evidence alone.' : coverage.testRuns.map((t, i) => <span key={i}>{t.command}: exit {t.exit}, {t.passed} passed, {t.failed} failed. </span>)}</li>
+              <li>{coverage.staleEvidence === 0 ? 'No stale evidence.' : `${coverage.staleEvidence} stale evidence reference${coverage.staleEvidence === 1 ? '' : 's'} — re-verify to refresh.`}</li>
+              {coverage.coverageGaps.length > 0 && <li>Search gaps: {coverage.coverageGaps.join('; ')}.</li>}
+              <li>Checked by {coverage.provider === 'rules' ? 'the rules engine (no model)' : `${coverage.provider} ${coverage.model}`} at {coverage.createdAt}.</li>
+            </ul>
+          );
+        })()}
+      </details>
       <nav className="report-nav" aria-label="Report view"><a href={`/run/${encodeURIComponent(report.run_id)}?project=${encodeURIComponent(project)}`} aria-current={query['view'] !== 'technical' ? 'page' : undefined}>Product view</a><a href={`/run/${encodeURIComponent(report.run_id)}?${technicalQuery}#technical-evidence`} aria-current={query['view'] === 'technical' ? 'page' : undefined}>Technical view</a></nav>
       <TraceAtlas before={atlasFromReport(report, repoDefault)} project={project} journey={false} />
       <ProductBrief results={report.results} project={project} run={report.run_id} repo={repoDefault} revision={report.checked_revision} decisions={decisions} failedTests={testRuns.some((t) => t.run.exit_code !== 0 || t.run.failed > 0)} reviewError={query['review_error']} />

@@ -5,7 +5,7 @@ import { readConnections } from '../../lib/connections';
 import Brand from './Brand';
 import { projectName } from '../../lib/presentation';
 
-const navigation = [['/workspace', 'Overview', 'workspace'], ['/new', 'Describe a feature', 'new'], ['/runs', 'Checks & evidence', 'runs'], ['/changes', 'Changes to review', 'changes'], ['/map', 'Understand your product', 'map'], ['/quiz', 'Test yourself', 'quiz']] as const;
+const navigation = [['/workspace', 'Overview', 'workspace'], ['/new', 'Describe a feature', 'new'], ['/runs', 'Checks & evidence', 'runs'], ['/changes', 'Changes to review', 'changes'], ['/map', 'Understand your product', 'map'], ['/activity', 'Agent activity', 'activity'], ['/quiz', 'Test yourself', 'quiz'], ['/readiness', 'Release readiness', 'readiness']] as const;
 
 export default async function AppShell({ active, children, context = {} }: { active: string; children: ReactNode; context?: Record<string, string | undefined> }) {
   const params = await projectParams(context);

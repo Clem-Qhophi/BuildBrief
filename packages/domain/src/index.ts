@@ -9,3 +9,6 @@ export * from './correction.js';
 export * from './extract.js';
 export * from './learning.js';
 export * from './review.js';
+export * from './questions.js';
+export * from './checks.js';
+export * from './capabilities.js';

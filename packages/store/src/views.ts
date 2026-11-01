@@ -1,6 +1,12 @@
 import {
+  type AcceptanceCheck,
+  type AgentEvent,
+  type AgentSession,
   type CandidateUnrequestedChange,
+  type ClarificationQuestion,
   type CorrectionPack,
+  type DecisionRecord,
+  type GateRecord,
   type IntentVersion,
   type VerificationFinding,
 } from '@buildbrief/domain';
@@ -14,6 +20,12 @@ export interface ProjectViews {
   orphans: Record<string, CandidateUnrequestedChange>;
   packs: Record<string, CorrectionPack>;
   snapshots: Record<string, { revision: string; at: string; files: number }>;
+  questions: Record<string, ClarificationQuestion>;
+  decisions: Record<string, DecisionRecord>;
+  checks: Record<string, AcceptanceCheck>;
+  sessions: Record<string, AgentSession>;
+  sessionEvents: Record<string, AgentEvent[]>;
+  gates: Record<string, GateRecord>;
 }
 
 /** Rebuilds all views from the append-only log. Deterministic: same events → same views. */
@@ -27,6 +39,12 @@ export function rebuildViews(s: ProjectStore, projectId: string): ProjectViews {
     orphans: {},
     packs: {},
     snapshots: {},
+    questions: {},
+    decisions: {},
+    checks: {},
+    sessions: {},
+    sessionEvents: {},
+    gates: {},
   };
   for (const e of events) {
     const p = e.payload;
@@ -85,6 +103,41 @@ export function rebuildViews(s: ProjectStore, projectId: string): ProjectViews {
         views.packs[pack.id] = pack;
         break;
       }
+      case 'question.asked': {
+        const question = p['question'] as ClarificationQuestion;
+        views.questions[question.id] = question;
+        break;
+      }
+      case 'decision.recorded': {
+        const decision = p['decision'] as DecisionRecord;
+        views.decisions[decision.question_id] = decision;
+        const existing = views.questions[decision.question_id];
+        if (existing !== undefined) views.questions[decision.question_id] = { ...existing, status: 'answered' };
+        break;
+      }
+      case 'check.recorded':
+      case 'check.completed': {
+        const check = p['check'] as AcceptanceCheck;
+        views.checks[check.id] = check;
+        break;
+      }
+      case 'agent.session_started': {
+        const session = p['session'] as AgentSession;
+        views.sessions[session.id] = session;
+        break;
+      }
+      case 'agent.event_recorded': {
+        const event = p['event'] as AgentEvent;
+        const list = views.sessionEvents[event.session_id] ?? [];
+        list.push(event);
+        views.sessionEvents[event.session_id] = list;
+        break;
+      }
+      case 'gate.decided': {
+        const gate = p['gate'] as GateRecord;
+        views.gates[gate.session_id] = gate;
+        break;
+      }
       default:
         break;
     }
@@ -117,5 +170,11 @@ export function loadViews(s: ProjectStore): ProjectViews {
     orphans: {},
     packs: {},
     snapshots: {},
+    questions: {},
+    decisions: {},
+    checks: {},
+    sessions: {},
+    sessionEvents: {},
+    gates: {},
   });
 }

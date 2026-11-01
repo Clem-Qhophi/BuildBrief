@@ -14,8 +14,9 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --pretty",
-    "test": "npm run build && node --test packages/domain/dist/test/*.test.js packages/store/dist/test/*.test.js packages/repo/dist/test/*.test.js packages/model-meta/dist/test/*.test.js packages/verifier/dist/test/*.test.js packages/cli/dist/test/*.test.js packages/learning/dist/test/*.test.js packages/mcp/dist/test/*.test.js && node --test packages/muse/test/*.test.js",
+    "test": "npm run build && node --test packages/domain/dist/test/*.test.js packages/store/dist/test/*.test.js packages/repo/dist/test/*.test.js packages/model-meta/dist/test/*.test.js packages/verifier/dist/test/*.test.js packages/cli/dist/test/*.test.js packages/learning/dist/test/*.test.js packages/mcp/dist/test/*.test.js packages/planning/dist/test/*.test.js packages/eval/dist/test/*.test.js && node --test packages/muse/test/*.test.js",
     "test:eval": "npm run build && node packages/eval/dist/src/run.js",
+    "test:ab": "npm run build && node packages/eval/dist/src/ab.js",
     "web": "npm --workspace @buildbrief/web run dev",
     "web:build": "npm --workspace @buildbrief/web run build",
     "clean": "node -e \"const{rmSync}=require('fs');for(const p of ['packages/domain','packages/store','packages/repo','packages/model-meta','packages/verifier','packages/cli','packages/eval']){try{rmSync(p+'/dist',{recursive:true,force:true});rmSync(p+'/tsconfig.tsbuildinfo',{force:true})}catch{}}try{rmSync('tsconfig.tsbuildinfo',{force:true})}catch{}\""
