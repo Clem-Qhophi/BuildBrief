@@ -52,5 +52,5 @@ export async function POST(request: Request): Promise<Response> {
     }
   }
   writeView(views.store, 'quizzes', finalList);
-  redirect(`/run/${encodeURIComponent(runId)}?project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#quiz`);
+  redirect(`/run/${encodeURIComponent(runId)}?view=technical&project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#quiz`);
 }

@@ -2,8 +2,8 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: '.',
-  testMatch: 'journey.spec.ts',
+  testMatch: '*.spec.ts',
   timeout: 120_000,
   retries: 0,
-  use: { baseURL: 'http://localhost:3103' },
+  use: { baseURL: process.env['BB_WEB_TEST_URL'] ?? 'http://localhost:3103' },
 });

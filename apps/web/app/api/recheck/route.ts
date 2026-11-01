@@ -36,7 +36,7 @@ export async function POST(request: Request): Promise<Response> {
       ...(accept !== '' ? { acceptCommand: accept, acceptCovers: covers } : {}),
     }));
   } catch (e) {
-    return new Response(`recheck failed: ${(e as Error).message}`, { status: 400 });
+    redirect(`/intent/${encodeURIComponent(intentId)}?${new URLSearchParams({ project, repo, error: (e as Error).message })}`);
   }
   const after = getViewsForWrite(root, project);
   const freshIds = Object.values(after.findings)
@@ -46,5 +46,5 @@ export async function POST(request: Request): Promise<Response> {
     appendEvent(after.store, 'evidence.invalidated', project, { finding_ids: oldIds, superseded_by_findings: freshIds });
     appendEvent(after.store, 'recheck.completed', project, { intent_id: intentId, invalidated: oldIds.length, fresh: freshIds.length });
   }
-  redirect(`/run/${encodeURIComponent(runId)}?project=${encodeURIComponent(project)}&repo=${encodeURIComponent(repo)}`);
+  redirect(`/run/${encodeURIComponent(runId)}?view=technical&project=${encodeURIComponent(project)}&repo=${encodeURIComponent(repo)}`);
 }

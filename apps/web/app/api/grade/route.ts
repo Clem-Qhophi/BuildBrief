@@ -27,6 +27,6 @@ export async function POST(request: Request): Promise<Response> {
   if (idx === -1) return new Response('unknown response', { status: 404 });
   responses[idx] = gradeResponse(responses[idx] as QuizResponse, grade, by);
   writeView(views.store, 'responses', responses);
-  const back = runId !== '' ? `/run/${encodeURIComponent(runId)}?project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#quiz` : '/';
+  const back = runId !== '' ? `/run/${encodeURIComponent(runId)}?view=technical&project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#quiz` : '/';
   redirect(back);
 }

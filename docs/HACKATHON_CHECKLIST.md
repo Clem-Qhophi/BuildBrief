@@ -1,6 +1,6 @@
 # Hackathon Checklist
 
-Deadline: **Nov 4, 2026, 9:00 PM ET = Nov 5, 02:00 UTC = Nov 4, 21:00 Ghana time.**
+Deadline: **Nov 4, 2026, 9:00 PM ET = Nov 5, 02:00 UTC = Nov 5, 02:00 Ghana time.**
 Internal freeze: **Nov 4, 18:00 Ghana time**. Dates subject to organizer change.
 
 ## Human-gated (needs your account access — engineering cannot do these)

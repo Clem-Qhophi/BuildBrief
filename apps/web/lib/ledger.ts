@@ -1,6 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import type { EvidencePointer } from '@buildbrief/domain';
+import type { ReviewDecision } from '@buildbrief/domain';
+import { readConnections } from './connections';
+import { readResetExample as resetState } from './reset-example';
+import { atlasFromReport, type AtlasInput } from './atlas';
+export { readResetExample } from './reset-example';
 import {
   openProjectStore,
   readEvents,
@@ -27,9 +32,9 @@ function storeFor(root: string): ProjectStore {
 }
 
 export function listProjects(root: string): string[] {
-  if (!ledgerExists(root)) return [];
-  const events = readEvents(storeFor(root));
-  return [...new Set(events.map((e) => e.project_id))].sort();
+  const connected = readConnections(root).map((c) => c.project);
+  const events = ledgerExists(root) ? readEvents(storeFor(root)) : [];
+  return [...new Set([...connected, ...events.map((e) => e.project_id)])].sort();
 }
 
 export interface IntentRow {
@@ -57,6 +62,13 @@ export function listIntents(root: string, project: string): IntentRow[] {
 
 export function getViews(root: string, project: string): ReturnType<typeof rebuildViews> {
   return rebuildViews(storeFor(root), project);
+}
+
+export function listReviewDecisions(root: string, project: string, run: string): ReviewDecision[] {
+  return readEvents(storeFor(root), project)
+    .filter((e) => e.type === 'review.decision_recorded')
+    .map((e) => e.payload['decision'] as ReviewDecision)
+    .filter((d) => d?.run_id === run);
 }
 
 export interface RunRow {
@@ -156,6 +168,7 @@ export function allReportEvidence(root: string): Map<string, EvidencePointer> {
 }
 
 export function readReportFile(root: string, runId: string): unknown | null {
+  if (runId === '' || basename(runId) !== runId || runId.includes('/') || runId.includes('\\')) return null;
   const p = join(root, '.buildbrief', 'reports', `${runId}.json`);
   if (!existsSync(p)) return null;
   try {
@@ -163,4 +176,18 @@ export function readReportFile(root: string, runId: string): unknown | null {
   } catch {
     return null;
   }
+}
+
+/** Public entry may expose only labeled built-in examples, never a user's project. */
+export function landingAtlas(root: string, requested = '') {
+  const candidates = readConnections(root).filter((c) => c.kind === 'example' && /^example-reset-[a-f0-9]{8}$/.test(c.project));
+  const connection = requested ? candidates.find((c) => c.project === requested) : candidates.at(-1);
+  if (!connection) return null;
+  const state = resetState(root, connection.project);
+  if (!state) return null;
+  const before = readReportFile(root, state.before) as AtlasInput | null;
+  const after = readReportFile(root, state.after) as AtlasInput | null;
+  if (!before || !after || before.project_id !== connection.project || after.project_id !== connection.project || before.run_id !== state.before || after.run_id !== state.after || before.checked_revision !== state.beforeRevision || after.checked_revision !== state.afterRevision || !Array.isArray(before.results) || !Array.isArray(after.results)) return null;
+  try { return { project: connection.project, before: atlasFromReport(before, connection.repo), after: atlasFromReport(after, connection.repo), probe: state.latestProbe ?? null }; }
+  catch { return null; }
 }

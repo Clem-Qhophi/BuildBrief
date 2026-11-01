@@ -37,6 +37,6 @@ export async function POST(request: Request): Promise<Response> {
   responses.push(response);
   writeView(views.store, 'responses', responses);
   appendEvent(views.store, 'quiz.answer_submitted', project, { response });
-  const back = runId !== '' ? `/run/${encodeURIComponent(runId)}?project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#quiz` : '/';
+  const back = runId !== '' ? `/run/${encodeURIComponent(runId)}?view=technical&project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#quiz` : '/';
   redirect(back);
 }

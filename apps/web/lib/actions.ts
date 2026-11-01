@@ -77,6 +77,7 @@ function runAcceptance(repo: string, command: string, covers: string[]): Coverin
  * orphans, report artifacts. Returns the run id for redirect.
  */
 export async function doVerify(root: string, params: VerifyParams): Promise<{ run_id: string; revision: string }> {
+  if (params.intent.state !== 'approved') throw new Error('Approve the requirements before running verification or an acceptance command.');
   const store = openProjectStore(root, params.project);
   const testRuns: CoveringTestRun[] = [];
   if (params.acceptCommand !== undefined && params.acceptCommand.trim() !== '') {

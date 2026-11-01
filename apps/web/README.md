@@ -1,21 +1,30 @@
 # Build Brief workbench (web)
 
-Thin read-only-ish reader over a real Build Brief ledger. No new verdict logic,
-no new database: pages render `.buildbrief/events.jsonl`, materialized views,
-and stored reports. Writes are limited to owner approval and orphan disposition,
-which append the same ledger events the CLI writes.
+Local product site and evidence workspace over the BuildBrief engine. Public
+home, features, and usage guide lead into persistent local project connections,
+intent capture, human approval, verification, corrections, rechecks, and learning.
+Pages render the real ledger and stored reports. Configuration and explicit
+workflow writes stay local; CLI/MCP contracts are unchanged.
 
 ## Start
 
 ```powershell
 cd C:\Projects\BuildBrief_Hackathon
 npm run build
-$env:BB_WORKSPACE = '<your-project-with-a-ledger>'
 npm run web
 ```
 
 Then open http://localhost:3103 in your browser. The server binds loopback
 only (mutation APIs have no auth — never expose it beyond your machine).
+No existing ledger is required. Start an idea without a repository at `/start`,
+connect a public GitHub URL or local checkout at `/connect`, or try the interactive
+password-recovery example at `/demo`. Referral remains a secondary example.
+Set `BB_WORKSPACE` before starting only if you
+want a different ledger directory. The example creates a unique fixture repository
+under that workspace and never resets an existing path.
+
+Current product walkthrough, test commands, and limits:
+[`docs/PRODUCT_EXPERIENCE.md`](../../docs/PRODUCT_EXPERIENCE.md).
 
 ## Full loop in the browser (M4a)
 
@@ -64,13 +73,8 @@ bb verify --project demo --intent <ID> --repo <REPO> --base <SHA>
 $env:BB_WORKSPACE = '<that scratch dir>'; npm run web
 ```
 
-## Verification status (2026-10-28)
+## Current verification
 
-- `npm run web:build`: passes (all routes type-check).
-- Data layer probed against a real demo ledger: 1 intent, 2 findings, 1 orphan,
-  1 report — all read correctly.
-- Live HTTP render: VERIFIED by owner on 2026-10-28 (intent ledger + intent
-  detail with stale/fresh findings render correctly from the reset-ledger).
-  Sandbox serves remain unverifiable here (listening sockets denied with
-  EACCES, even loopback) — future UI changes still need an owner eyeball.
-  Report any render error back and it becomes a bug, not a claim.
+See [the product validation record](../../docs/PRODUCT_VALIDATION.md) for executed
+commands, browser observations, and remaining limits. Test fixtures use clearly
+named synthetic personas; they do not approve the owner's actual project work.

@@ -34,5 +34,5 @@ export async function POST(request: Request): Promise<Response> {
     at: new Date().toISOString(),
   });
   for (const p of packs) appendEvent(views.store, 'correction.pack_created', project, { pack: p });
-  redirect(`/run/${encodeURIComponent(runId)}?project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#packs`);
+  redirect(`/run/${encodeURIComponent(runId)}?view=technical&project=${encodeURIComponent(project)}${repo !== '' ? `&repo=${encodeURIComponent(repo)}` : ''}#packs`);
 }

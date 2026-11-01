@@ -78,8 +78,10 @@ test('buildbrief journey: connect to reverify to handover to export', async ({ p
 
   await test.step('verify runs against the repo revision', async () => {
     expect(REPO, 'E2E_REPO must be set in this terminal').not.toBe('');
+    await page.getByText('Connect code & check later', { exact: true }).click();
     await page.getByPlaceholder(/C:\\path/).fill(REPO);
     await page.getByRole('button', { name: 'Verify at current revision' }).click();
+    await page.getByRole('link', { name: 'Technical view', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Findings' })).toBeVisible({ timeout: 90_000 });
     firstRunId = page.url().match(/\/run\/([^?]+)/)?.[1] ?? '';
     expect(firstRunId).toMatch(/^bb_run_/);
@@ -158,7 +160,7 @@ test('buildbrief journey: connect to reverify to handover to export', async ({ p
     for (const role of ['engineer', 'founder', 'qa', 'marketing']) {
       await expect(page.getByRole('heading', { name: role, exact: true })).toBeVisible();
     }
-    await expect(page.locator('body')).toContainText('never invented');
+    await expect(page.locator('body')).toContainText('Nothing is invented');
   });
 
   await test.step('ledger export downloads JSONL', async () => {

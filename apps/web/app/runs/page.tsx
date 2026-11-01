@@ -1,15 +1,19 @@
+import AppShell from '../components/AppShell';
+import { projectHref, projectParams } from '../../lib/context';
 import { listRuns, workspaceRoot } from '../../lib/ledger';
 
 export const dynamic = 'force-dynamic';
 
-export default function RunsPage() {
+export default async function RunsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const params = await projectParams(await searchParams);
   const root = workspaceRoot();
-  const runs = listRuns(root);
+  const runs = listRuns(root).filter((r) => !params['project'] || r.project === params['project']);
   return (
-    <main>
+    <AppShell active="runs" context={params}>
       <h1>Verification runs</h1>
+      <p className="lede">Checks for {params['project'] || 'this workspace'}, newest first. Open a run to follow its evidence strand from request to verdict.</p>
       {runs.length === 0 ? (
-        <p className="muted">No stored reports in <code>{root}/.buildbrief/reports</code> yet.</p>
+        <div className="empty">No verification runs for this project yet. <a href={projectHref('/workspace', params)}>Review an intent</a>, approve its criteria, then verify the repository.</div>
       ) : (
         <table>
           <thead>
@@ -25,7 +29,7 @@ export default function RunsPage() {
             {runs.map((r) => (
               <tr key={r.id}>
                 <td>
-                  <a href={`/run/${encodeURIComponent(r.id)}${r.project !== '' ? `?project=${encodeURIComponent(r.project)}` : ''}`}><code>{r.id.slice(0, 24)}…</code></a>
+                  <a href={projectHref(`/run/${encodeURIComponent(r.id)}`, { ...params, project: r.project })}>Open report <code>{r.revision.slice(0, 7)}</code></a>
                 </td>
                 <td><code>{r.revision.slice(0, 7)}</code></td>
                 <td>{r.summary}</td>
@@ -36,6 +40,6 @@ export default function RunsPage() {
           </tbody>
         </table>
       )}
-    </main>
+    </AppShell>
   );
 }

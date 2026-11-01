@@ -31,7 +31,7 @@ export async function POST(request: Request): Promise<Response> {
       ...(accept !== '' ? { acceptCommand: accept, acceptCovers: covers } : {}),
     }));
   } catch (e) {
-    return new Response(`verify failed: ${(e as Error).message}`, { status: 400 });
+    redirect(`/intent/${encodeURIComponent(intentId)}?${new URLSearchParams({ project, repo, error: (e as Error).message })}`);
   }
   redirect(`/run/${encodeURIComponent(runId)}?project=${encodeURIComponent(project)}&repo=${encodeURIComponent(repo)}`);
 }

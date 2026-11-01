@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.mjs",
     "dev": "next dev -H 127.0.0.1 -p 3103",
     "build": "next build",
     "start": "next start -H 127.0.0.1 -p 3103"
@@ -15,6 +16,7 @@
     "@buildbrief/repo": "0.1.0",
     "@buildbrief/store": "0.1.0",
     "@buildbrief/verifier": "0.1.0",
+    "motion": "^14.7.1",
     "next": "16.4.3",
     "react": "19.3.1",
     "react-dom": "19.3.1"

@@ -1,3 +1,5 @@
+import AppShell from '../components/AppShell';
+import { projectParams } from '../../lib/context';
 import { workspaceRoot } from '../../lib/ledger';
 
 export const dynamic = 'force-dynamic';
@@ -15,27 +17,31 @@ async function NewAsync({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const params = await searchParams;
+  const params = await projectParams(await searchParams);
   const repoDefault = params['repo'] ?? '';
   const root = workspaceRoot();
   return (
-    <main>
+    <AppShell active="new" context={params}>
       <h1>New intent</h1>
-      <p className="muted">
-        Capture what you want built. Extraction proposes draft criteria —
-        nothing becomes authoritative until an owner approves it.
+      <p className="lede">
+        Describe one thing your product should do, in your own words. We’ll
+        turn it into a draft review brief. You review and approve the requirements next.
       </p>
-      <div className="notice">
-        Ledger lives at <code>{root}/.buildbrief</code>. The repository you
-        verify stays on this machine; nothing is uploaded. Verification runs
-        locally with the deterministic rules engine unless you pick another
-        provider.
-      </div>
+      <ol className="steps">
+        <li className={repoDefault !== '' ? 'done' : undefined}>1 · Connect repository</li>
+        <li className="now">2 · Describe what to build</li>
+        <li>3 · Approve requirements</li>
+        <li>4 · Verify implementation</li>
+        <li>5 · Fix and recheck</li>
+      </ol>
+      {params['connected'] === '1' && <div className="notice ok" role="status">Repository connected. Now describe what your agent should build.</div>}
+      <div className="notice">Start with a concrete behavior: “Password reset links should expire after 30 minutes.” Your original words are preserved. The draft is a proposal until you approve it.</div>
+      {repoDefault === '' && <p className="muted">Starting a whole new product? <a href="/start">Start with your idea</a>. You can also capture a feature draft here before connecting code.</p>}
       <form method="POST" action="/api/capture">
         <p>
           <label>
             Project{' '}
-            <input type="text" name="project" defaultValue="demo" required />
+            <input type="text" name="project" defaultValue={params['project'] || ''} placeholder="My product" required />
           </label>
         </p>
         <p>
@@ -47,7 +53,7 @@ async function NewAsync({
         <p>
           <label>
             Feature{' '}
-            <input type="text" name="feature" defaultValue="referral" required />
+            <input type="text" name="feature" placeholder="Referral code expiry" required />
           </label>
         </p>
         <p>
@@ -66,10 +72,8 @@ async function NewAsync({
           <button type="submit">Capture draft intent</button>
         </p>
       </form>
-      <p className="muted">
-        Next: review the draft, approve it with your name, then verify it
-        against the repository revision.
-      </p>
-    </main>
+      <details className="technical-details"><summary>Where this brief is stored</summary><p>Ledger directory: <code>{root}/.buildbrief</code></p></details>
+      <p className="muted">This creates your draft brief. Next you’ll review it, approve it with your name, and check the implementation.</p>
+    </AppShell>
   );
 }

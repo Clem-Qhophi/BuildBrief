@@ -4,7 +4,7 @@
 
 | Use | Model | Mode | When |
 |:---|:---|:---|:---|
-| Verdict proposals over evidence excerpts | `muse-spark-1.3` via `POST https://api.meta.ai/v1/chat/completions` | Standard (content NOT used for training) | Only with `--provider meta` and a key set; otherwise never called |
+| Verdict proposals over evidence excerpts | `muse-spark-1.3` via `POST https://api.llama.com/v1/chat/completions` | Standard (content NOT used for training) | Only with `--provider meta` and a key set; otherwise never called |
 | Default assessment (deterministic) | `rules-v1` (lexical, in-repo) | Local, $0 | Default for CLI, eval, and all measured results |
 | Test double | `mock-1` (fixture-driven) | Local | Unit tests only |
 
